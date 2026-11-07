@@ -3,7 +3,11 @@ using LevelVault.Providers;
 
 namespace LevelVault.Services;
 
-/// <summary>Runs registered providers, caches normalized results, and adds source-linked clues to an investigation.</summary>
+/// <summary>
+/// Performs bounded, multi-round deep research. Each query is sent to every
+/// registered provider, successful responses are cached, and every query is
+/// checkpointed so cancellation never discards already collected clues.
+/// </summary>
 public sealed class InvestigationResearchService
 {
     private readonly ProviderRegistry _registry;
@@ -16,52 +20,163 @@ public sealed class InvestigationResearchService
     }
 
     public async Task<ResearchRunSummary> ResearchAsync(
-        Investigation investigation, CancellationToken cancellationToken = default)
+        Investigation investigation,
+        IProgress<ResearchProgress>? progress = null,
+        Func<CancellationToken, Task>? checkpoint = null,
+        CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(investigation);
         var providers = _registry.Providers.ToArray();
-        var added = 0;
-        var failed = 0;
-        var messages = new List<string>();
-        foreach (var provider in providers)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var query = new ProviderSearchQuery(FreeText: investigation.Query);
-            var cacheKey = provider.Id + "|" + investigation.Query.Trim().ToLowerInvariant();
-            ProviderSearchResponse? response = await _cache.GetAsync<ProviderSearchResponse>(
-                cacheKey, TimeSpan.FromHours(12), cancellationToken);
-            if (response is null)
-            {
-                response = await provider.SearchAsync(query, cancellationToken);
-                if (response.Succeeded)
-                    await _cache.SetAsync(cacheKey, response, cancellationToken);
-            }
-            messages.Add(response.Message ?? provider.DisplayName);
-            if (!response.Succeeded) { failed++; continue; }
+        var queue = new Queue<DeepResearchPlanner.ResearchQuery>(
+            DeepResearchPlanner.CreateSeedQueries(investigation));
+        var queued = new HashSet<string>(queue.Select(x => x.Text), StringComparer.OrdinalIgnoreCase);
+        var completed = new HashSet<string>(investigation.CompletedResearchQueries, StringComparer.OrdinalIgnoreCase);
+        var knownSources = new HashSet<string>(
+            investigation.Clues.Select(x => NormalizeSource(x.SourceUrl)).Where(x => x.Length > 0),
+            StringComparer.OrdinalIgnoreCase);
 
-            foreach (var result in response.Results)
+        var queriesExecuted = 0;
+        var providersChecked = 0;
+        var providersSucceeded = 0;
+        var providersFailed = 0;
+        var cluesAdded = 0;
+        var maxDepthReached = 0;
+        var messages = new List<string>();
+
+        investigation.ResearchStatus = "running";
+        investigation.LastResearchStartedUtc = DateTime.UtcNow;
+        await checkpoint?.Invoke(cancellationToken)!;
+
+        try
+        {
+            while (queue.Count > 0 && queriesExecuted < DeepResearchPlanner.MaxQueriesPerRun)
             {
-                if (investigation.Clues.Any(c =>
-                    string.Equals(c.SourceUrl, result.SourceUrl, StringComparison.OrdinalIgnoreCase)))
-                    continue;
-                investigation.Clues.Add(new Clue
+                cancellationToken.ThrowIfCancellationRequested();
+                var item = queue.Dequeue();
+                if (item.Depth > DeepResearchPlanner.MaxDepth ||
+                    completed.Contains(item.Text)) continue;
+
+                maxDepthReached = Math.Max(maxDepthReached, item.Depth);
+                progress?.Report(new ResearchProgress(
+                    "searching", item.Text, item.Depth, queriesExecuted,
+                    DeepResearchPlanner.MaxQueriesPerRun, cluesAdded,
+                    $"deep research · round {item.Depth + 1} · {item.Reason}"));
+
+                var newlyDiscovered = new List<Clue>();
+                foreach (var provider in providers)
                 {
-                    Kind = result.RecordType,
-                    Title = result.Title,
-                    Detail = "automatically discovered metadata lead. " +
-                             (result.LevelId is null ? "" : "level id: " + result.LevelId + ". ") +
-                             (result.Creator is null ? "" : "creator: " + result.Creator + ". ") +
-                             (result.SongId is null ? "" : "song id: " + result.SongId + ". ") +
-                             (result.RawDataReference is null ? "" : "archive identifier: " + result.RawDataReference + ". "),
-                    SourceUrl = result.SourceUrl,
-                    Confidence = "unverified"
-                });
-                added++;
+                    cancellationToken.ThrowIfCancellationRequested();
+                    providersChecked++;
+                    var cacheKey = provider.Id + "|deep|" + item.Text.Trim().ToLowerInvariant();
+                    ProviderSearchResponse? response = await _cache.GetAsync<ProviderSearchResponse>(
+                        cacheKey, TimeSpan.FromHours(12), cancellationToken);
+                    if (response is null)
+                    {
+                        response = await provider.SearchAsync(
+                            new ProviderSearchQuery(FreeText: item.Text), cancellationToken);
+                        if (response.Succeeded)
+                            await _cache.SetAsync(cacheKey, response, cancellationToken);
+                    }
+
+                    messages.Add($"{provider.DisplayName}: {response.Message}");
+                    if (!response.Succeeded)
+                    {
+                        providersFailed++;
+                        continue;
+                    }
+
+                    providersSucceeded++;
+                    foreach (var result in response.Results)
+                    {
+                        var sourceKey = NormalizeSource(result.SourceUrl);
+                        if (sourceKey.Length == 0 || !knownSources.Add(sourceKey)) continue;
+
+                        var clue = new Clue
+                        {
+                            Kind = result.RecordType,
+                            Title = result.Title,
+                            Detail = $"discovered by deep research query: {item.Text}. " +
+                                     (result.LevelId is null ? "" : "level id: " + result.LevelId + ". ") +
+                                     (result.Creator is null ? "" : "creator: " + result.Creator + ". ") +
+                                     (result.SongId is null ? "" : "song id: " + result.SongId + ". ") +
+                                     (result.RawDataReference is null ? "" : "archive identifier: " + result.RawDataReference + ". "),
+                            SourceUrl = result.SourceUrl,
+                            Confidence = "unverified"
+                        };
+                        investigation.Clues.Add(clue);
+                        newlyDiscovered.Add(clue);
+                        cluesAdded++;
+                    }
+                }
+
+                completed.Add(item.Text);
+                investigation.CompletedResearchQueries = completed.ToList();
+                queriesExecuted++;
+
+                foreach (var clue in newlyDiscovered)
+                {
+                    foreach (var followUp in DeepResearchPlanner.CreateFollowUpQueries(clue, item.Depth + 1))
+                    {
+                        if (completed.Contains(followUp.Text) || !queued.Add(followUp.Text)) continue;
+                        queue.Enqueue(followUp);
+                    }
+                }
+
+                investigation.ResearchQueriesExecuted = queriesExecuted;
+                investigation.ResearchCluesAdded += newlyDiscovered.Count;
+                await checkpoint?.Invoke(cancellationToken)!;
+                progress?.Report(new ResearchProgress(
+                    "query complete", item.Text, item.Depth, queriesExecuted,
+                    DeepResearchPlanner.MaxQueriesPerRun, cluesAdded,
+                    $"{newlyDiscovered.Count} new source(s) · {queue.Count} follow-up search(es) queued"));
             }
+
+            investigation.ResearchStatus = queue.Count == 0 ? "completed" : "completed · query limit reached";
+            investigation.LastResearchCompletedUtc = DateTime.UtcNow;
+            await checkpoint?.Invoke(cancellationToken)!;
         }
-        return new ResearchRunSummary(providers.Length, providers.Length - failed, failed, added, messages);
+        catch (OperationCanceledException)
+        {
+            investigation.ResearchStatus = "paused · cancelled";
+            await checkpoint?.Invoke(CancellationToken.None)!;
+            throw;
+        }
+        catch
+        {
+            investigation.ResearchStatus = "paused · error";
+            await checkpoint?.Invoke(CancellationToken.None)!;
+            throw;
+        }
+
+        return new ResearchRunSummary(
+            queriesExecuted, providersChecked, providersSucceeded, providersFailed,
+            cluesAdded, maxDepthReached, queue.Count, messages);
+    }
+
+    private static string NormalizeSource(string? source)
+    {
+        if (string.IsNullOrWhiteSpace(source)) return "";
+        if (!Uri.TryCreate(source, UriKind.Absolute, out var uri)) return source.Trim();
+        var builder = new UriBuilder(uri) { Fragment = "" };
+        return builder.Uri.AbsoluteUri.TrimEnd('/');
     }
 }
 
+public sealed record ResearchProgress(
+    string Stage,
+    string CurrentQuery,
+    int Depth,
+    int QueriesCompleted,
+    int QueryLimit,
+    int CluesAdded,
+    string Detail);
+
 public sealed record ResearchRunSummary(
-    int ProvidersChecked, int ProvidersSucceeded, int ProvidersFailed,
-    int CluesAdded, IReadOnlyList<string> Messages);
+    int QueriesExecuted,
+    int ProvidersChecked,
+    int ProvidersSucceeded,
+    int ProvidersFailed,
+    int CluesAdded,
+    int MaxDepthReached,
+    int FollowUpsRemaining,
+    IReadOnlyList<string> Messages);
