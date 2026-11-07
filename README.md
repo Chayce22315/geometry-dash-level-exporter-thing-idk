@@ -23,7 +23,7 @@ levelvault investigates public references to geometry dash levels, organizes evi
 - exact-source duplicate detection that preserves all original clues
 - native wpf evidence graph viewer with hover details
 - phase 4 always-on deep research: multi-round query expansion from the target and newly discovered clues
-- every deep-research query is sent to every registered provider (currently internet archive and github repositories)
+- every deep-research query is routed through every registered provider, reusing fresh cached responses when available (currently internet archive and github repositories)
 - up to 24 queries per run, four follow-up levels, and up to 150 archive metadata results per query
 - live progress and cancellation controls
 - automatic checkpoints, saved pending-query queues, and resume after cancellation or interruption
