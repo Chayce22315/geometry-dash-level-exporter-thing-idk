@@ -16,7 +16,7 @@
                 <TextBlock Text="geometry dash clue finder &amp; recovery workspace" Foreground="{StaticResource MutedBrush}" Margin="0,4,0,0"/>
             </StackPanel>
             <Border DockPanel.Dock="Right" Background="#282344" CornerRadius="12" Padding="12,7" VerticalAlignment="Center">
-                <TextBlock Text="phase 4 · deep research" Foreground="#C8C0FF" FontSize="11" FontWeight="SemiBold"/>
+                <TextBlock Text="phase 5 · data recovery" Foreground="#C8C0FF" FontSize="11" FontWeight="SemiBold"/>
             </Border>
         </DockPanel>
 
@@ -66,6 +66,7 @@
                     <DockPanel Grid.Row="1" Margin="0,18,0,10">
                         <TextBlock Text="collected clues" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         <Button DockPanel.Dock="Right" x:Name="CancelResearchButton" Content="cancel research" Click="CancelResearch_Click" IsEnabled="False" Margin="4,0,0,0"/>
+                        <Button DockPanel.Dock="Right" Content="scan for original data" Click="ScanRecovery_Click" Margin="4,0,0,0"/>
                         <Button DockPanel.Dock="Right" Content="view graph" Click="ViewGraph_Click" Margin="4,0,0,0"/>
                         <Button DockPanel.Dock="Right" Content="analyze clues" Click="AnalyzeClues_Click" Margin="4,0,0,0"/>
                         <Button DockPanel.Dock="Right" Content="import .gmd" Click="ImportGmd_Click" Margin="4,0,0,0"/>
