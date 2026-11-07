@@ -36,7 +36,7 @@ public sealed class GitHubRepositoryProvider : IArchiveProvider
             await RateGate.WaitAsync(cancellationToken);
             try
             {
-                var wait = TimeSpan.FromSeconds(5) - (DateTime.UtcNow - _lastRequestUtc);
+                var wait = TimeSpan.FromSeconds(7) - (DateTime.UtcNow - _lastRequestUtc);
                 if (wait > TimeSpan.Zero) await Task.Delay(wait, cancellationToken);
                 using var response = await Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 _lastRequestUtc = DateTime.UtcNow;
