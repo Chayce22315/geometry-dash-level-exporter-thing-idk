@@ -1,10 +1,10 @@
 # levelvault
 
-**a geometry dash clue finder, archive research workspace, and original-level recovery tool.**
+**a geometry dash clue finder, archive research workspace, original-level recovery tool, and provenance-aware export studio.**
 
 levelvault investigates public references to geometry dash levels, organizes evidence, and helps locate surviving original level data. its long-term goal is to validate and export authentic `.gmd` files.
 
-> current status: early windows desktop build. phase 3 clue intelligence is implemented and the user-confirmed build succeeded. phase 4 adds always-on deep research orchestration. the current live sources are internet archive metadata and github public repository search; this is not an internet-wide crawler or a level downloader.
+ > current status: native windows desktop app with phases 1–5 build-confirmed by the user. phase 6 export studio is now implemented in source and awaiting a fresh windows build. current live research sources are internet archive metadata and github public repository search; this is not an internet-wide crawler.
 
 ## what exists now
 
@@ -28,6 +28,10 @@ levelvault investigates public references to geometry dash levels, organizes evi
 - live progress and cancellation controls
 - automatic checkpoints, saved pending-query queues, and resume after cancellation or interruption
 - saved research status and query history
+- phase 5 recovery candidates with original source URLs, retrieval timestamps, validation state, and raw/payload SHA-256 hashes
+- phase 6 export studio for selecting a validated candidate and exporting its original bytes as `.gmd`
+- automatic adjacent JSON provenance manifest containing source, hashes, level metadata, and validation notes
+- re-inspection before export and round-trip verification of the exported copy; failed copies are removed
 
 ## phase 3 status
 
