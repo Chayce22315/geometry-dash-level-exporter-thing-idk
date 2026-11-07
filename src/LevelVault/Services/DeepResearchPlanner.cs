@@ -79,7 +79,7 @@ public static class DeepResearchPlanner
     }
 
     private static string Clean(string value) =>
-        Whitespace.Replace(value.Trim().Trim('"', '\'', '.', ',', ';'), " ");
+        Whitespace.Replace(value.Trim().Trim('.', ',', ';'), " ");
 
     public sealed record ResearchQuery(string Text, int Depth, string Reason);
 }
