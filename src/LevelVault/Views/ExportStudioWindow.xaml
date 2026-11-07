@@ -1,0 +1,38 @@
+<Window x:Class="LevelVault.Views.ExportStudioWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="levelvault · export studio" Height="560" Width="920" MinHeight="440" MinWidth="720"
+        Background="{StaticResource CanvasBrush}" WindowStartupLocation="CenterOwner">
+    <Grid Margin="22">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,16">
+            <TextBlock Text="export studio" FontSize="26" FontWeight="Bold"/>
+            <TextBlock Text="choose a validated original candidate. levelvault rechecks it, copies the original bytes unchanged, and writes a provenance manifest."
+                       Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,5,0,0"/>
+        </StackPanel>
+        <DataGrid x:Name="CandidateGrid" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False"
+                  IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow"
+                  Background="#111720" Foreground="{StaticResource TextBrush}" RowBackground="#171E28"
+                  AlternatingRowBackground="#202938" BorderBrush="#394456" GridLinesVisibility="Horizontal"
+                  HeadersVisibility="Column">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="level" Binding="{Binding LevelName}" Width="2*"/>
+                <DataGridTextColumn Header="level id" Binding="{Binding LevelId}" Width="110"/>
+                <DataGridTextColumn Header="format" Binding="{Binding Format}" Width="75"/>
+                <DataGridTextColumn Header="status" Binding="{Binding Status}" Width="100"/>
+                <DataGridTextColumn Header="payload bytes" Binding="{Binding PayloadBytes}" Width="110"/>
+                <DataGridTextColumn Header="source" Binding="{Binding SourceUrl}" Width="3*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <DockPanel Grid.Row="2" Margin="0,14,0,0">
+            <TextBlock x:Name="StatusText" Text="only validated candidates can be exported as .gmd files."
+                       Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+            <Button DockPanel.Dock="Right" Content="export selected .gmd" Click="ExportSelected_Click"
+                    Height="38" Padding="16,0" Margin="12,0,0,0" Background="#5144A6"/>
+        </DockPanel>
+    </Grid>
+</Window>
