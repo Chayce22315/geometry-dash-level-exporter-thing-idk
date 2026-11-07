@@ -33,7 +33,7 @@
                              ToolTip="enter a level id, name, creator, song id, or any combination"/>
                 </StackPanel>
                 <Button Grid.Column="1" Content="create investigation" Click="CreateInvestigation_Click" Height="40" Margin="12,26,8,0" Background="#5144A6"/>
-                <Button Grid.Column="2" Content="research archives" Click="ResearchArchives_Click" Height="40" Margin="0,26,0,0"/>
+                <Button Grid.Column="2" x:Name="DeepResearchButton" Content="deep research" Click="ResearchArchives_Click" Height="40" Margin="0,26,0,0"/>
             </Grid>
         </Border>
 
@@ -65,6 +65,7 @@
                     </StackPanel>
                     <DockPanel Grid.Row="1" Margin="0,18,0,10">
                         <TextBlock Text="collected clues" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <Button DockPanel.Dock="Right" x:Name="CancelResearchButton" Content="cancel research" Click="CancelResearch_Click" IsEnabled="False" Margin="4,0,0,0"/>
                         <Button DockPanel.Dock="Right" Content="view graph" Click="ViewGraph_Click" Margin="4,0,0,0"/>
                         <Button DockPanel.Dock="Right" Content="analyze clues" Click="AnalyzeClues_Click" Margin="4,0,0,0"/>
                         <Button DockPanel.Dock="Right" Content="import .gmd" Click="ImportGmd_Click" Margin="4,0,0,0"/>
