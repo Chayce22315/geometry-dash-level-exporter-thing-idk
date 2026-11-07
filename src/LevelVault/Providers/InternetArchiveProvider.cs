@@ -42,7 +42,7 @@ public sealed class InternetArchiveProvider : IArchiveProvider
         var expression = string.Join(" OR ", terms.SelectMany(term =>
         {
             var escaped = EscapeTerm(term);
-            if (Regex.IsMatch(escaped, @"^\\d{4,12}$"))
+            if (Regex.IsMatch(escaped, @"^\d{4,12}$"))
                 return new[] { $"identifier:{escaped}", $"title:\"{escaped}\"", $"description:\"{escaped}\"" };
             var words = escaped.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Where(word => word.Length > 1).Take(8).ToArray();
