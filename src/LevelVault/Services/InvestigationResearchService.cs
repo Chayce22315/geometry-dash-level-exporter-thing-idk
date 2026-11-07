@@ -76,32 +76,59 @@ public sealed class InvestigationResearchService
                     providersChecked++;
                     var cacheKey = provider.Id + "|deep-v2|" + item.Text.Trim().ToLowerInvariant();
                     ProviderSearchResponse response;
+                    ProviderSearchResponse? cached = null;
                     try
                     {
-                        var cached = await _cache.GetAsync<ProviderSearchResponse>(
+                        cached = await _cache.GetAsync<ProviderSearchResponse>(
                             cacheKey, TimeSpan.FromHours(12), cancellationToken);
-                        if (cached is not null)
-                        {
-                            response = cached;
-                        }
-                        else
-                        {
-                            response = await provider.SearchAsync(
-                                new ProviderSearchQuery(FreeText: item.Text), cancellationToken);
-                            if (response.Succeeded)
-                                await _cache.SetAsync(cacheKey, response, cancellationToken);
-                        }
                     }
                     catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                     {
                         throw;
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        // A single unavailable provider must not abort the entire investigation.
-                        response = new ProviderSearchResponse(
-                            provider.Id, false, Array.Empty<ProviderSearchResult>(),
-                            $"provider failed: {ex.GetType().Name}: {ex.Message}");
+                        // A damaged or inaccessible cache entry should trigger a fresh provider request.
+                    }
+
+                    if (cached is not null)
+                    {
+                        response = cached;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            response = await provider.SearchAsync(
+                                new ProviderSearchQuery(FreeText: item.Text), cancellationToken);
+                        }
+                        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                        {
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            // A single unavailable provider must not abort the entire investigation.
+                            response = new ProviderSearchResponse(
+                                provider.Id, false, Array.Empty<ProviderSearchResult>(),
+                                $"provider failed: {ex.GetType().Name}: {ex.Message}");
+                        }
+
+                        if (response.Succeeded)
+                        {
+                            try
+                            {
+                                await _cache.SetAsync(cacheKey, response, cancellationToken);
+                            }
+                            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                            {
+                                throw;
+                            }
+                            catch (Exception ex)
+                            {
+                                messages.Add($"{provider.DisplayName}: response could not be cached ({ex.GetType().Name}).");
+                            }
+                        }
                     }
 
                     messages.Add($"{provider.DisplayName}: {response.Message}");
