@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using LevelVault.Models;
 using LevelVault.Services;
 using LevelVault.Providers;
+using LevelVault.Views;
 
 namespace LevelVault;
 
@@ -13,6 +14,7 @@ public partial class MainWindow : Window
     private readonly InvestigationStore _store = new();
     private readonly ProviderRegistry _providers = new();
     private readonly JsonResponseCache _cache = new();
+    private readonly EvidenceAnalysisService _analysis = new();
     private readonly ObservableCollection<Investigation> _investigations = [];
     private Investigation? _active;
 
@@ -49,11 +51,11 @@ public partial class MainWindow : Window
         {
             var service = new InvestigationResearchService(_providers, _cache);
             var summary = await service.ResearchAsync(_active);
+            var graph = _analysis.Analyze(_active);
             await _store.SaveAsync(_active);
             RefreshActive();
-            StatusText.Text = $"research complete: {summary.CluesAdded} new clue(s), " +
-                $"{summary.ProvidersSucceeded}/{summary.ProvidersChecked} provider(s) responded. " +
-                string.Join(" ", summary.Messages);
+            StatusText.Text = $"research complete: {summary.CluesAdded} new clue(s), {summary.ProvidersSucceeded}/{summary.ProvidersChecked} provider(s) responded. " +
+                $"graph: {graph.NodeCount} nodes, {graph.RelationshipCount} relationships. " + string.Join(" ", summary.Messages);
         }
         catch (OperationCanceledException)
         {
@@ -86,9 +88,10 @@ public partial class MainWindow : Window
         var url = Prompt("source url (optional)", "source");
         var detail = Prompt("notes / evidence (optional)", "details");
         _active.Clues.Add(new Clue { Title = title.Trim(), SourceUrl = url.Trim(), Detail = detail.Trim() });
+        var summary = _analysis.Analyze(_active);
         await _store.SaveAsync(_active);
         RefreshActive();
-        StatusText.Text = "clue saved. source and notes are retained with the investigation.";
+        StatusText.Text = $"clue saved and analyzed: {summary.NodeCount} graph nodes, {summary.RelationshipCount} relationships.";
     }
 
     private async void ImportGmd_Click(object sender, RoutedEventArgs e)
@@ -108,9 +111,27 @@ public partial class MainWindow : Window
                 Confidence = result.IsValid ? "structure valid" : "unverified"
             });
         }
+        var graph = _analysis.Analyze(_active);
         await _store.SaveAsync(_active);
         RefreshActive();
-        StatusText.Text = $"checked {dialog.FileNames.Length} file(s). validation confirms structure, not authorship or completeness.";
+        StatusText.Text = $"checked {dialog.FileNames.Length} file(s), graph now has {graph.NodeCount} nodes. validation confirms structure, not authorship or completeness.";
+    }
+
+    private async void AnalyzeClues_Click(object sender, RoutedEventArgs e)
+    {
+        if (_active is null) { StatusText.Text = "create or select an investigation first."; return; }
+        var summary = _analysis.Analyze(_active);
+        await _store.SaveAsync(_active);
+        RefreshActive();
+        StatusText.Text = $"analysis complete: {summary.ExtractedMentions} mentions, {summary.CorroboratedEntities} corroborated entities, {summary.DuplicatePairs} duplicate pair(s). {summary.ConfidenceNote}";
+    }
+
+    private async void ViewGraph_Click(object sender, RoutedEventArgs e)
+    {
+        if (_active is null) { StatusText.Text = "select an investigation first."; return; }
+        if (_active.EvidenceNodes.Count == 0) _analysis.Analyze(_active);
+        await _store.SaveAsync(_active);
+        new EvidenceGraphWindow(_active) { Owner = this }.ShowDialog();
     }
 
     private void InvestigationList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -123,7 +144,7 @@ public partial class MainWindow : Window
     {
         ActiveTitle.Text = _active?.Query ?? "no investigation selected";
         ActiveSubtitle.Text = _active is null ? "create an investigation to begin collecting evidence."
-            : $"{_active.Clues.Count} clue(s) · created {_active.CreatedUtc.ToLocalTime():g}";
+            : $"{_active.Clues.Count} clue(s) · {_active.EvidenceNodes.Count} graph nodes · {_active.EvidenceEdges.Count} relationships · created {_active.CreatedUtc.ToLocalTime():g}";
         ClueGrid.ItemsSource = _active?.Clues;
     }
 
