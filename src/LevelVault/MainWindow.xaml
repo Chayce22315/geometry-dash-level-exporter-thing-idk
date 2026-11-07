@@ -74,17 +74,23 @@
                         <Button DockPanel.Dock="Right" Content="open search set" Click="OpenSearchSet_Click" Margin="4,0,0,0"/>
                         <Button DockPanel.Dock="Right" Content="add clue" Click="AddClue_Click"/>
                     </DockPanel>
-                    <DataGrid x:Name="ClueGrid" Grid.Row="2" AutoGenerateColumns="False" CanUserAddRows="False"
-                              Background="#111720" Foreground="{StaticResource TextBrush}" RowBackground="#171E28"
-                              AlternatingRowBackground="#202938" BorderBrush="#394456" GridLinesVisibility="Horizontal"
-                              HeadersVisibility="Column" IsReadOnly="True">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="type" Binding="{Binding Kind}" Width="100"/>
-                            <DataGridTextColumn Header="clue" Binding="{Binding Title}" Width="2*"/>
-                            <DataGridTextColumn Header="source" Binding="{Binding SourceUrl}" Width="2*"/>
-                            <DataGridTextColumn Header="confidence" Binding="{Binding Confidence}" Width="110"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <Grid Grid.Row="2">
+                        <DataGrid x:Name="ClueGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                                  Background="#111720" Foreground="{StaticResource TextBrush}" RowBackground="#171E28"
+                                  AlternatingRowBackground="#202938" BorderBrush="#394456" GridLinesVisibility="Horizontal"
+                                  HeadersVisibility="Column" IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="type" Binding="{Binding Kind}" Width="100"/>
+                                <DataGridTextColumn Header="clue" Binding="{Binding Title}" Width="2*"/>
+                                <DataGridTextColumn Header="source" Binding="{Binding SourceUrl}" Width="2*"/>
+                                <DataGridTextColumn Header="confidence" Binding="{Binding Confidence}" Width="110"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <TextBlock x:Name="EmptyCluesText" Text="no clues collected yet. run deep research or add a clue manually.\n\nif research returns zero clues, open the research report to see which sources responded."
+                                   Foreground="{StaticResource MutedBrush}" TextAlignment="Center"
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   MaxWidth="420" Margin="24" IsHitTestVisible="False"/>
+                    </Grid>
                     <TextBlock Grid.Row="3" x:Name="StatusText" Text="clues are stored locally. analyze them to build an evidence graph." Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,12,0,0"/>
                 </Grid>
             </Border>
