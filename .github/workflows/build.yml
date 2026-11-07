@@ -1,4 +1,4 @@
-name: build
+name: build-and-test
 
 on:
   push:
@@ -7,8 +7,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  build:
+  test:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,5 +19,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - name: build
-        run: dotnet build .\LevelVault.sln --configuration Release
+      - name: restore
+        run: dotnet restore .\LevelVault.sln
+      - name: build and run tests
+        run: dotnet test .\LevelVault.sln --configuration Release --no-restore
