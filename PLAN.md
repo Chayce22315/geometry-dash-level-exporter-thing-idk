@@ -67,7 +67,7 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 - health/status reporting
 - caching and rate-limit policy
 - integration tests with saved fixtures
-- initial live internet archive metadata provider\n- live github public repository metadata provider\n- live duckduckgo public web-search adapter with conservative request spacing
+- initial live internet archive metadata provider\n- live github public repository metadata provider\n- live duckduckgo public web-search adapter with conservative request spacing\n- live reddit public search adapter for public discussion leads\n- live youtube public search-page adapter for public video leads
 
 ### m3: clue intelligence (implemented; build confirmed by user)
 - conservative entity extraction for level ids, song ids, creator labels, videos, archive records, repositories, and web references
