@@ -25,6 +25,8 @@ public partial class MainWindow : Window
         _providers.Register(new InternetArchiveProvider());
         _providers.Register(new GitHubRepositoryProvider());
         _providers.Register(new DuckDuckGoSearchProvider());
+        _providers.Register(new RedditSearchProvider());
+        _providers.Register(new YouTubeSearchProvider());
         InvestigationList.ItemsSource = _investigations;
         Loaded += async (_, _) =>
         {
