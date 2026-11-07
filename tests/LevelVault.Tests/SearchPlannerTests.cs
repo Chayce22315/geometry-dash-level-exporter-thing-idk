@@ -10,11 +10,11 @@ public sealed class SearchPlannerTests
     {
         var targets = SearchPlanner.BuildTargets("133678584");
 
-        var tiktok = Assert.Single(targets.Where(x => x.Label == "tiktok public search"));
+        var tiktok = Assert.Single(targets, x => x.Label == "tiktok public search");
         Assert.Equal("www.tiktok.com", new Uri(tiktok.Url).Host);
         Assert.Contains("133678584", tiktok.Url);
 
-        var discord = Assert.Single(targets.Where(x => x.Label == "discord indexed links"));
+        var discord = Assert.Single(targets, x => x.Label == "discord indexed links");
         Assert.Equal("www.google.com", new Uri(discord.Url).Host);
         Assert.Contains("site%3Adiscord.com%2Fchannels", discord.Url);
         Assert.Contains("133678584", discord.Url);
