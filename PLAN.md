@@ -124,7 +124,7 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 - verify export refuses partial candidates and preserves original bytes with a provenance manifest
 - run restore, build, and tests in windows github actions
 - publish a self-contained single-file win-x64 app artifact for main-branch pushes
-- latest verification: windows workflow #109 passed restore, build, automated tests, self-contained win-x64 publishing, and artifact upload
+- latest verification: windows workflow #126 passed restore, build, all 29 automated tests, self-contained win-x64 publishing, and artifact upload
 - remaining: additional recovery fixtures and network-edge-case tests, accessibility/performance review, clean-machine artifact verification, versioned release notes, and signed/reproducible release packaging
 
 ## evidence confidence
