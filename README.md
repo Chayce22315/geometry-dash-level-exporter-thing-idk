@@ -4,7 +4,7 @@
 
 levelvault investigates public references to geometry dash levels, organizes evidence, and helps locate surviving original level data. its long-term goal is to validate and export authentic `.gmd` files.
 
- > current status: early windows desktop build. phase 2 includes one live public archive adapter. this is not yet an internet-wide crawler or a level downloader.
+> current status: early windows desktop build. phase 3 adds conservative clue intelligence and a native evidence graph. phase 2 includes one live public archive adapter. this is not an internet-wide crawler or a level downloader.
 
 ## what exists now
 
@@ -18,18 +18,19 @@ levelvault investigates public references to geometry dash levels, organizes evi
 - provider-independent service boundaries and a live internet archive metadata search adapter
 - automatic source-linked clue collection, duplicate suppression, and a 12-hour local response cache
 - conservative request spacing, cancellation support, and provider health checks
+- phase 3 entity extraction for explicitly labeled level ids, song ids, creators, and discovered urls
+- relationship graph with source-linked rationale and conservative cross-domain corroboration
+- exact-source duplicate detection that preserves all original clues
+- native wpf evidence graph viewer with hover details
 
-## phase 2 status
+## phase 3 status
 
-implemented: provider contract and registry, internet archive public metadata search, normalized source-linked clues, local caching, rate limiting, cancellation, and health checks.
-
-still planned: more archive adapters, multi-hop query expansion, evidence graph visualization, original level payload retrieval, decompression, and authentic `.gmd` export. internet archive records are metadata leads, not recovered level files.
+implemented in source; awaiting the automated windows build. graph entities are normalized, relationships carry confidence explanations, and repeated references are corroborated only when they appear across distinct source domains. exact duplicate source urls are linked but never deleted. a corroborated reference is not proof of authorship or recovered level data.
 
 ## planned capabilities
 
 - independently implemented archive/provider adapters
 - public-source discovery and query expansion
-- evidence correlation and an interactive clue graph
 - duplicate and historical-version comparison
 - original level-string parsing and compression support
 - integrity checks and provenance-aware exports
@@ -44,8 +45,8 @@ still planned: more archive adapters, multi-hop query expansion, evidence graph 
 ## run
 
 ```powershell
-dotnet build .\LevelVault.sln
-dotnet run --project .\src\LevelVault\LevelVault.csproj
+dotnet build .\\LevelVault.sln
+dotnet run --project .\\src\\LevelVault\\LevelVault.csproj
 ```
 
 ## local data
@@ -53,7 +54,7 @@ dotnet run --project .\src\LevelVault\LevelVault.csproj
 investigations are stored under:
 
 ```
-%LOCALAPPDATA%\LevelVault\investigations
+%LOCALAPPDATA%\\LevelVault\\investigations
 ```
 
 each investigation is a readable json file. investigations and cache files remain local. when archive research is started, the search clue is sent to internet archive to perform the search. successful responses are cached for 12 hours.
@@ -71,8 +72,10 @@ each investigation is a readable json file. investigations and cache files remai
 
 ```
 src/LevelVault/
-  Models/       investigation and clue records
-  Services/     local storage, search planning, gmd validation
+  Models/       investigation, clue, and evidence graph records
+  Services/     local storage, research, analysis, search planning, gmd validation
+  Providers/    public archive adapters
+  Views/        native evidence graph window
   App.xaml      shared theme resources
   MainWindow    native desktop workspace
 ```
@@ -80,8 +83,8 @@ src/LevelVault/
 ## roadmap
 
 1. foundation and local investigation workspace
-2. provider framework and initial public archive integration (in progress)
-3. clue extraction, correlation, and graph
+2. provider framework and initial public archive integration
+3. clue extraction, correlation, and graph (implemented, build verification pending)
 4. autonomous, resumable investigations
 5. level-string parsing, decompression, and validation
 6. provenance-aware .gmd export
