@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace LevelVault.Providers;
 
@@ -13,6 +14,8 @@ public sealed class GitHubRepositoryProvider : IArchiveProvider
     private static readonly HttpClient Client = CreateClient();
     private static readonly SemaphoreSlim RateGate = new(1, 1);
     private static DateTime _lastRequestUtc = DateTime.MinValue;
+    private static readonly Regex LevelIdPattern = new(@"\blevel\s*(?:id)?\s*[:#=]\s*(\d{4,12})\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex SongIdPattern = new(@"\b(?:song(?:\s*id)?|custom\s*song)\s*[:#=]\s*(\d{1,10})\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     public string Id => "github-repositories";
     public string DisplayName => "github repositories";
@@ -55,13 +58,15 @@ public sealed class GitHubRepositoryProvider : IArchiveProvider
                         var htmlUrl = ReadString(item, "html_url");
                         if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(htmlUrl)) continue;
                         var description = ReadString(item, "description");
-                        var owner = item.TryGetProperty("owner", out var ownerNode)
-                            ? ReadString(ownerNode, "login") : null;
+                        var searchableText = fullName + " " + description;
+                        var levelId = LevelIdPattern.Match(searchableText);
+                        var songId = SongIdPattern.Match(searchableText);
                         results.Add(new ProviderSearchResult(
                             fullName + (string.IsNullOrWhiteSpace(description) ? "" : " · " + description),
                             htmlUrl,
                             "github repository metadata",
-                            Creator: owner,
+                            LevelId: levelId.Success ? levelId.Groups[1].Value : null,
+                            SongId: songId.Success ? songId.Groups[1].Value : null,
                             RawDataReference: fullName));
                     }
                 }
