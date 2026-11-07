@@ -70,11 +70,10 @@ public sealed class RedditSearchProvider : IArchiveProvider
                         var source = permalink.StartsWith("/", StringComparison.Ordinal)
                             ? "https://www.reddit.com" + permalink : permalink;
                         results.Add(new ProviderSearchResult(
-                            title + (string.IsNullOrWhiteSpace(subreddit) ? "" : " · r/" + subreddit),
+                            title + (string.IsNullOrWhiteSpace(subreddit) ? "" : " · r/" + subreddit) + (string.IsNullOrWhiteSpace(author) ? "" : " · u/" + author),
                             source,
                             "reddit discussion",
                             LevelId: levelId.Success ? levelId.Groups[1].Value : null,
-                            Creator: string.IsNullOrWhiteSpace(author) ? null : author,
                             SongId: songId.Success ? songId.Groups[1].Value : null,
                             RawDataReference: subreddit));
                         if (results.Count >= 25) break;
