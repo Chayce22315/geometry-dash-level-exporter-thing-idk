@@ -50,9 +50,11 @@ public sealed class LevelRecoveryService
                     await using var stream=await response.Content.ReadAsStreamAsync(ct);
                     await using var buffer=new MemoryStream();
                     var chunk=new byte[81920];
+                    var oversized=false;
                     while(true){var count=await stream.ReadAsync(chunk,ct);if(count==0)break;
-                        if(buffer.Length+count>MaxBytes)throw new InvalidDataException("download exceeds 25 MiB.");
+                        if(buffer.Length+count>MaxBytes){oversized=true;break;}
                         await buffer.WriteAsync(chunk.AsMemory(0,count),ct);}
+                    if(oversized){failures.Add(name+": download exceeded the 25 MiB limit; skipped.");continue;}
                     var folder=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                         "LevelVault","recovered-candidates",Safe(identifier));
                     Directory.CreateDirectory(folder);
