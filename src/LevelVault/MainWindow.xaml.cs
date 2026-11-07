@@ -22,6 +22,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        _providers.Register(new BoomlingsLevelProvider());
         _providers.Register(new InternetArchiveProvider());
         _providers.Register(new GitHubRepositoryProvider());
         _providers.Register(new DuckDuckGoSearchProvider());
