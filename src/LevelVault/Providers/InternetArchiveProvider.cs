@@ -77,7 +77,12 @@ public sealed class InternetArchiveProvider : IArchiveProvider
                         var creator = ReadString(doc, "creator");
                         var date = ReadString(doc, "date");
                         var description = ReadString(doc, "description");
-                        var notes = string.Join(" · ", new[] { creator, date, description }.Where(x => !string.IsNullOrWhiteSpace(x)));
+                        var notes = string.Join(" · ", new[]
+                        {
+                            string.IsNullOrWhiteSpace(creator) ? null : "archive uploader: " + creator,
+                            date,
+                            description
+                        }.Where(x => !string.IsNullOrWhiteSpace(x)));
                         var searchableText = string.Join(" ", title, identifier, description);
                         var levelId = LevelIdPattern.Match(searchableText);
                         var songId = SongIdPattern.Match(searchableText);
@@ -86,7 +91,6 @@ public sealed class InternetArchiveProvider : IArchiveProvider
                             "https://archive.org/details/" + Uri.EscapeDataString(identifier),
                             "archive metadata",
                             LevelId: levelId.Success ? levelId.Groups[1].Value : null,
-                            Creator: creator,
                             SongId: songId.Success ? songId.Groups[1].Value : null,
                             RawDataReference: identifier));
                     }
