@@ -37,13 +37,14 @@ current status: native windows desktop app. phases 1–6 have been build-confirm
 - explicit empty-state guidance replaces the blank clue-table appearance
 - reddit public search collects public discussion links and metadata without assuming post authors created the level
 - youtube public search collects public video links, titles, and channel names as leads
+- evidence graph recognizes user-supplied tiktok links as video leads and discord/reddit links as discussion leads without attempting to access private content
 - internet archive query expansion supports broader word matching and exact numeric-id searches
 - github repository searches are no longer restricted to readme-only matches
 - github actions runs the test suite and publishes a self-contained win-x64 app artifact on pushes to main
 
 ## phase 7 status
 
-automated test coverage and release packaging are being added. the windows workflow restores, builds, runs tests, and publishes a self-contained single-file win-x64 app artifact for main-branch pushes. a green workflow is required before calling the release verified.
+automated test coverage and release packaging are implemented. the latest windows workflow (run #101) passed restore, build, all automated tests, self-contained win-x64 publishing, and artifact upload. the artifact is available from the workflow run. clean-machine verification and versioned release notes remain before calling the release fully verified.
 
 ## phase 3 status
 
