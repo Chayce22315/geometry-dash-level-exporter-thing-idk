@@ -32,7 +32,7 @@ public static class DeepResearchPlanner
 
         foreach (var clue in investigation.Clues)
             foreach (var query in CreateFollowUpQueries(clue, 1))
-                Add(queries, query.Query, query.Depth, query.Reason);
+                Add(queries, query.Text, query.Depth, query.Reason);
 
         return queries;
     }
