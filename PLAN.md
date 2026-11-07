@@ -113,7 +113,7 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 
 ### m7: hardening and release (implementation in progress)
 - add a dedicated automated test project to the solution
-- cover valid plist payloads, gzip decompression, malformed base64, malformed object pairs, and non-plist inputs
+- cover valid plist payloads, gzip decompression, malformed base64, malformed object pairs, non-plist inputs, and public provider input validation
 - verify export refuses partial candidates and preserves original bytes with a provenance manifest
 - run restore, build, and tests in windows github actions
 - publish a self-contained single-file win-x64 app artifact for main-branch pushes
@@ -133,7 +133,7 @@ metadata confidence and level-data validation are separate dimensions.
 
 ## phase 4 research policy
 
-Every run uses the deep-research pipeline. It starts from the original query, expands into game-context and explicitly identified entity searches, then creates follow-up queries from newly discovered source records. The current safety bounds are 24 queries per run, depth 4, and up to 3 pages of 50 metadata records per Internet Archive query. A later run resumes saved pending queries rather than silently restarting completed work. The current live providers are Internet Archive metadata search, GitHub public repository search, and DuckDuckGo public HTML web search; the engine fans out to every provider registered in the application. The DuckDuckGo HTML interface is not a stable API and may change or rate-limit requests. Broader source coverage requires additional provider adapters. Deep research is thorough within configured public sources, not a claim of crawling the entire internet.
+Every run uses the deep-research pipeline. It starts from the original query, expands into game-context and explicitly identified entity searches, then creates follow-up queries from newly discovered source records. The current safety bounds are 24 queries per run, depth 4, and up to 3 pages of 50 metadata records per Internet Archive query. A later run resumes saved pending queries rather than silently restarting completed work. The current live providers are Internet Archive metadata search, GitHub public repository search, DuckDuckGo public HTML web search, Reddit public discussion search, and YouTube public video search; the engine fans out to every provider registered in the application. The DuckDuckGo and YouTube HTML interfaces are not stable APIs and may change or rate-limit requests. Reddit may deny or rate-limit unauthenticated public search. These sources provide leads only, not recovered level data. Deep research is thorough within configured public sources, not a claim of crawling the entire internet.
 
 ## phase 7 verification boundary\n\nA passing compile is not the same as a passing test suite or a verified release. Phase 7 is complete only after the Windows CI workflow passes its automated tests and successfully publishes an artifact that has been checked on a clean Windows environment. The current test fixtures verify format behavior; they do not prove that a recovered file is authored by a claimed creator or that every possible Geometry Dash payload variant is supported.\n\n## current implementation boundary
 
