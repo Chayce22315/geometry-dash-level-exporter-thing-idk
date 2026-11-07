@@ -17,7 +17,7 @@ public sealed class DuckDuckGoSearchProvider : IArchiveProvider
         @"<a[^>]+class=""result__a""[^>]+href=""([^""]+)""[^>]*>(.*?)</a>",
         RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
     private static readonly Regex ResultSnippet = new(
-        @"<a[^>]+class=""result__snippet""[^>]*>(.*?)</a>|<div[^>]+class=""result__snippet""[^>]*>(.*?)</div>",
+        @"<a[^>]+class=""[^""]*result__snippet[^""]*""[^>]*>(.*?)</a>|<div[^>]+class=""[^""]*result__snippet[^""]*""[^>]*>(.*?)</div>",
         RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
     private static readonly Regex Tags = new(@"<[^>]+>", RegexOptions.Compiled);
 
