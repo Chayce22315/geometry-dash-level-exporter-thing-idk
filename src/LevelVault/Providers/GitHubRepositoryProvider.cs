@@ -34,7 +34,7 @@ public sealed class GitHubRepositoryProvider : IArchiveProvider
         // forcing README-only matches, which excluded useful repository metadata.
         var search = $"{term.Trim()} geometry dash";
         var url = "https://api.github.com/search/repositories?q=" +
-                  Uri.EscapeDataString(search) + "&sort=updated&order=desc&per_page=30";
+                  Uri.EscapeDataString(search) + "&sort=updated&order=desc&per_page=50";
 
         try
         {
