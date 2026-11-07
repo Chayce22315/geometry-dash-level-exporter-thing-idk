@@ -50,6 +50,7 @@ public sealed class InvestigationResearchService
         investigation.LastResearchStartedUtc = DateTime.UtcNow;
         if (checkpoint is not null) await checkpoint(cancellationToken);
 
+        DeepResearchPlanner.ResearchQuery? activeQuery = null;
         try
         {
             while (queue.Count > 0 && queriesExecuted < DeepResearchPlanner.MaxQueriesPerRun)
@@ -58,6 +59,7 @@ public sealed class InvestigationResearchService
                 var item = queue.Dequeue();
                 if (item.Depth > DeepResearchPlanner.MaxDepth ||
                     completed.Contains(item.Text)) continue;
+                activeQuery = item;
 
                 maxDepthReached = Math.Max(maxDepthReached, item.Depth);
                 progress?.Report(new ResearchProgress(
@@ -125,6 +127,7 @@ public sealed class InvestigationResearchService
                     }
                 }
 
+                activeQuery = null;
                 investigation.ResearchQueriesExecuted = queriesExecuted;
                 investigation.ResearchCluesAdded += newlyDiscovered.Count;
                 investigation.PendingResearchQueries = queue
@@ -146,7 +149,7 @@ public sealed class InvestigationResearchService
         }
         catch (OperationCanceledException)
         {
-            investigation.PendingResearchQueries = queue
+            investigation.PendingResearchQueries = (activeQuery is null ? queue : new[] { activeQuery }.Concat(queue))
                 .Select(x => new ResearchQueryState { Text = x.Text, Depth = x.Depth, Reason = x.Reason })
                 .ToList();
             investigation.ResearchStatus = "paused · cancelled";
@@ -155,7 +158,7 @@ public sealed class InvestigationResearchService
         }
         catch
         {
-            investigation.PendingResearchQueries = queue
+            investigation.PendingResearchQueries = (activeQuery is null ? queue : new[] { activeQuery }.Concat(queue))
                 .Select(x => new ResearchQueryState { Text = x.Text, Depth = x.Depth, Reason = x.Reason })
                 .ToList();
             investigation.ResearchStatus = "paused · error";
