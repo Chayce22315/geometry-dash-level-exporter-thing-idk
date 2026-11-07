@@ -35,22 +35,23 @@ current status: native windows desktop app. phases 1–6 have been build-confirm
 - phase 7 automated tests for valid plist payloads, gzip payloads, malformed base64, malformed object pairs, non-plist input, and safe export behavior
 - github actions now runs the test suite and publishes a self-contained win-x64 app artifact on pushes to main
 
-## phase 7 status\n\nautomated test coverage and release packaging are being added. the windows workflow restores, builds, runs tests, and publishes a self-contained single-file win-x64 app artifact for main-branch pushes. a green workflow is required before calling the release verified.\n\n## phase 3 status
+## phase 7 status
+
+automated test coverage and release packaging are being added. the windows workflow restores, builds, runs tests, and publishes a self-contained single-file win-x64 app artifact for main-branch pushes. a green workflow is required before calling the release verified.
+
+## phase 3 status
 
 implemented; the user confirmed the windows build succeeded. graph entities are normalized, relationships carry confidence explanations, and repeated references are corroborated only when they appear across distinct source domains. exact duplicate source urls are linked but never deleted. a corroborated reference is not proof of authorship or recovered level data.
 
 ## phase 4 status
 
-implemented in source; awaiting a fresh windows build. every research run uses the deep-research pipeline. it expands the original query, follows newly discovered clues, checks every registered provider, reports progress, and saves a resumable queue after each completed query. the current run limits are 24 queries and four follow-up levels. internet archive searches paginate up to three pages of 50 records each. internet archive and github public repository search are currently registered; broader coverage arrives as additional documented public-source adapters are added.
+implemented; the user confirmed the windows build succeeded. every research run uses the deep-research pipeline. it expands the original query, follows newly discovered clues, checks every registered provider, reports progress, and saves a resumable queue after each completed query. the current run limits are 24 queries and four follow-up levels. internet archive searches paginate up to three pages of 50 records each. internet archive and github public repository search are currently registered; broader coverage arrives as additional documented public-source adapters are added.
 
-## planned capabilities
+## remaining improvements
 
-- independently implemented archive/provider adapters
-- public-source discovery and query expansion
-- duplicate and historical-version comparison
-- original level-string parsing and compression support
-- integrity checks and provenance-aware exports
-- resumable investigations and batch search
+- expand documented public-source adapters and historical-version comparison
+- add provider failure simulations and more recovery fixtures
+- verify the release artifact on a clean windows machine and prepare versioned release notes
 
 ## requirements
 
@@ -93,7 +94,9 @@ src/LevelVault/
   Providers/    public archive adapters
   Views/        native evidence graph and export studio windows
   App.xaml      shared theme resources
-  MainWindow    native desktop workspace\ntests/\n  LevelVault.Tests/ automated recovery and export tests
+  MainWindow    native desktop workspace
+tests/
+  LevelVault.Tests/ automated recovery and export tests
 ```
 
 ## roadmap
@@ -101,10 +104,10 @@ src/LevelVault/
 1. foundation and local investigation workspace
 2. provider framework and initial public archive integration
 3. clue extraction, correlation, and graph (implemented; build confirmed by user)
-4. autonomous, resumable deep investigations (implemented, build pending)
-5. level-string parsing, decompression, and validation
-6. provenance-aware .gmd export
-7. expanded archives, testing, and release packaging
+4. autonomous, resumable deep investigations (implemented; build confirmed by user)
+5. original level-data recovery (implemented; build confirmed by user)
+6. provenance-aware .gmd export studio (implemented; build confirmed by user)
+7. hardening, automated tests, and self-contained windows packaging (in progress)
 
 see [PLAN.md](PLAN.md) for the full development plan.
 
