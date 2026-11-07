@@ -23,6 +23,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _providers.Register(new InternetArchiveProvider());
+        _providers.Register(new GitHubRepositoryProvider());
         InvestigationList.ItemsSource = _investigations;
         Loaded += async (_, _) =>
         {
