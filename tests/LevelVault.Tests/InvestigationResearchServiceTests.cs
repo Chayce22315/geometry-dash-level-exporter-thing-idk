@@ -36,6 +36,40 @@ public sealed class InvestigationResearchServiceTests
         Assert.True(healthy.Calls > 0);
     }
 
+    [Fact]
+    public async Task CancellationPreservesActiveAndPendingQueriesForResume()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var registry = new ProviderRegistry();
+        registry.Register(new CancelingProvider(cancellation));
+        var investigation = new Investigation { Query = "133678584" };
+        var service = new InvestigationResearchService(registry, new JsonResponseCache());
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            service.ResearchAsync(investigation, cancellationToken: cancellation.Token));
+
+        Assert.Equal("paused · cancelled", investigation.ResearchStatus);
+        Assert.NotEmpty(investigation.PendingResearchQueries);
+        Assert.Contains(investigation.PendingResearchQueries,
+            query => query.Text.Equals("133678584", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private sealed class CancelingProvider(CancellationTokenSource cancellation) : IArchiveProvider
+    {
+        public string Id => "canceling";
+        public string DisplayName => "canceling test provider";
+        public ProviderCapabilities Capabilities => ProviderCapabilities.SearchById;
+
+        public Task<ProviderSearchResponse> SearchAsync(
+            ProviderSearchQuery query, CancellationToken cancellationToken)
+        {
+            cancellation.Cancel();
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(new ProviderSearchResponse(Id, true,
+                Array.Empty<ProviderSearchResult>()));
+        }
+    }
+
     private sealed class StubProvider(
         string id,
         Func<ProviderSearchQuery, Task<ProviderSearchResponse>> search) : IArchiveProvider
