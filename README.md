@@ -4,7 +4,7 @@
 
 levelvault investigates public references to geometry dash levels, organizes evidence, and helps locate surviving original level data. its long-term goal is to validate and export authentic `.gmd` files.
 
- > current status: native windows desktop app with phases 1–5 build-confirmed by the user. phase 6 export studio is now implemented in source and awaiting a fresh windows build. current live research sources are internet archive metadata and github public repository search; this is not an internet-wide crawler.
+current status: native windows desktop app. phases 1–6 have been build-confirmed by the user. phase 7 adds automated validation tests and a self-contained windows release artifact through github actions. current live research sources are internet archive metadata and github public repository search; this is not an internet-wide crawler.
 
 ## what exists now
 
@@ -32,8 +32,10 @@ levelvault investigates public references to geometry dash levels, organizes evi
 - phase 6 export studio for selecting a validated candidate and exporting its original bytes as `.gmd`
 - automatic adjacent JSON provenance manifest containing source, hashes, level metadata, and validation notes
 - re-inspection before export and round-trip verification of the exported copy; failed copies are removed
+- phase 7 automated tests for valid plist payloads, gzip payloads, malformed base64, malformed object pairs, non-plist input, and safe export behavior
+- github actions now runs the test suite and publishes a self-contained win-x64 app artifact on pushes to main
 
-## phase 3 status
+## phase 7 status\n\nautomated test coverage and release packaging are being added. the windows workflow restores, builds, runs tests, and publishes a self-contained single-file win-x64 app artifact for main-branch pushes. a green workflow is required before calling the release verified.\n\n## phase 3 status
 
 implemented; the user confirmed the windows build succeeded. graph entities are normalized, relationships carry confidence explanations, and repeated references are corroborated only when they appear across distinct source domains. exact duplicate source urls are linked but never deleted. a corroborated reference is not proof of authorship or recovered level data.
 
@@ -87,11 +89,11 @@ each investigation is a readable json file. investigations and cache files remai
 ```
 src/LevelVault/
   Models/       investigation, clue, and evidence graph records
-  Services/     local storage, research, analysis, search planning, gmd validation
+  Services/     local storage, research, analysis, search planning, gmd validation and export
   Providers/    public archive adapters
-  Views/        native evidence graph window
+  Views/        native evidence graph and export studio windows
   App.xaml      shared theme resources
-  MainWindow    native desktop workspace
+  MainWindow    native desktop workspace\ntests/\n  LevelVault.Tests/ automated recovery and export tests
 ```
 
 ## roadmap
