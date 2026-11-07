@@ -84,13 +84,10 @@ public sealed class InvestigationResearchService
                     }
 
                     messages.Add($"{provider.DisplayName}: {response.Message}");
-                    if (!response.Succeeded)
-                    {
-                        providersFailed++;
-                        continue;
-                    }
+                    if (response.Succeeded) providersSucceeded++;
+                    else providersFailed++;
 
-                    providersSucceeded++;
+                    // Some providers can return useful partial results before a rate limit or transient failure.
                     foreach (var result in response.Results)
                     {
                         var sourceKey = NormalizeSource(result.SourceUrl);
@@ -128,7 +125,7 @@ public sealed class InvestigationResearchService
                 }
 
                 activeQuery = null;
-                investigation.ResearchQueriesExecuted = queriesExecuted;
+                investigation.ResearchQueriesExecuted += 1;
                 investigation.ResearchCluesAdded += newlyDiscovered.Count;
                 investigation.PendingResearchQueries = queue
                     .Select(x => new ResearchQueryState { Text = x.Text, Depth = x.Depth, Reason = x.Reason })
