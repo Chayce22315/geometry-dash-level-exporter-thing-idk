@@ -81,7 +81,7 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 ### m4: autonomous investigations (implemented, build verification pending)
 - deep research is the default behavior for every research run; no shallow mode
 - multi-round query expansion from the original target and newly discovered clues
-- every query is sent to every registered provider
+- every query is routed through every registered provider, reusing fresh cached responses when available
 - bounded investigation depth and query count to prevent runaway searches
 - provider pagination for up to 150 archive metadata records per query
 - 12-hour response caching and source-level deduplication
