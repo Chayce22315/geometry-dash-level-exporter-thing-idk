@@ -43,7 +43,7 @@ public sealed class RedditSearchProvider : IArchiveProvider
                 var searchTerm = term.Contains("geometry dash", StringComparison.OrdinalIgnoreCase)
                     ? term : term + " geometry dash";
                 var url = "https://www.reddit.com/search.json?q=" + Uri.EscapeDataString(searchTerm) +
-                          "&sort=relevance&t=all&limit=25&raw_json=1";
+                          "&sort=relevance&t=all&limit=50&raw_json=1";
                 using var response = await Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 _lastRequestUtc = DateTime.UtcNow;
                 if (response.StatusCode is HttpStatusCode.TooManyRequests or HttpStatusCode.Forbidden)
