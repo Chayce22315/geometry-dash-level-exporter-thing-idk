@@ -85,7 +85,7 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 - native wpf evidence graph viewer with source/rationale tooltips
 - automatic graph refresh after research, manual clue capture, and file inspection
 
-### m4: autonomous investigations (implemented, build verification pending)
+### m4: autonomous investigations (implemented; build confirmed by user)
 - deep research is the default behavior for every research run; no shallow mode
 - multi-round query expansion from the original target and newly discovered clues
 - every query is routed through every registered provider, reusing fresh cached responses when available
@@ -124,6 +124,7 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 - verify export refuses partial candidates and preserves original bytes with a provenance manifest
 - run restore, build, and tests in windows github actions
 - publish a self-contained single-file win-x64 app artifact for main-branch pushes
+- latest verification: windows workflow #109 passed restore, build, automated tests, self-contained win-x64 publishing, and artifact upload
 - remaining: provider failure simulations, recovery network edge cases, accessibility/performance review, clean-machine artifact verification, versioned release notes, and signed/reproducible release packaging
 
 ## evidence confidence
