@@ -95,6 +95,24 @@ public partial class MainWindow : Window
         }
     }
 
+    private async void ScanRecovery_Click(object sender, RoutedEventArgs e)
+    {
+        if (_active is null) { StatusText.Text = "create or select an investigation first."; return; }
+        StatusText.Text = "scanning local files and public archive records...";
+        try
+        {
+            var service = new LevelRecoveryService();
+            var progress = new Progress<string>(message => StatusText.Text = message);
+            var summary = await service.ScanAsync(_active, progress);
+            await _store.SaveAsync(_active);
+            RefreshActive();
+            StatusText.Text = $"recovery scan complete: {summary.FilesChecked} file(s) inspected, {summary.CandidatesAdded} new candidate(s), " +
+                $"{summary.ValidatedCandidates} validated and {summary.NonValidatedCandidates} partial/unvalidated. " +
+                "metadata and unrecognized files are never treated as recovered level data.";
+        }
+        catch (Exception ex) { StatusText.Text = "recovery scan stopped: " + ex.Message; }
+    }
+
     private void CancelResearch_Click(object sender, RoutedEventArgs e)
     {
         _researchCancellation?.Cancel();
