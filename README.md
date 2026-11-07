@@ -44,7 +44,7 @@ current status: native windows desktop app. phases 1–6 have been build-confirm
 
 ## phase 7 status
 
-automated test coverage and release packaging are implemented. the latest windows workflow (run #101) passed restore, build, all automated tests, self-contained win-x64 publishing, and artifact upload. the artifact is available from the workflow run. clean-machine verification and versioned release notes remain before calling the release fully verified.
+automated test coverage and release packaging are implemented. the latest windows workflow (run #109) passed restore, build, all automated tests, self-contained win-x64 publishing, and artifact upload. the `LevelVault-win-x64` artifact is available from the workflow run and expires november 21, 2026. clean-machine verification and versioned release notes remain before calling the release fully verified. clean-machine verification and versioned release notes remain before calling the release fully verified.
 
 ## phase 3 status
 
