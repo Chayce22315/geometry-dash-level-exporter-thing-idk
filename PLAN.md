@@ -125,7 +125,7 @@ metadata confidence and level-data validation are separate dimensions.
 
 ## phase 4 research policy
 
-Every run uses the deep-research pipeline. It starts from the original query, expands into game-context and explicitly identified entity searches, then creates follow-up queries from newly discovered source records. The current safety bounds are 24 queries per run, depth 4, and up to 3 pages of 50 metadata records per Internet Archive query. A later run resumes saved pending queries rather than silently restarting completed work. The current live provider is Internet Archive; the engine fans out to every provider registered in the application, and broader source coverage requires additional provider adapters. Deep research is thorough within configured public sources, not a claim of crawling the entire internet.
+Every run uses the deep-research pipeline. It starts from the original query, expands into game-context and explicitly identified entity searches, then creates follow-up queries from newly discovered source records. The current safety bounds are 24 queries per run, depth 4, and up to 3 pages of 50 metadata records per Internet Archive query. A later run resumes saved pending queries rather than silently restarting completed work. The current live providers are Internet Archive metadata search and GitHub public repository search; the engine fans out to every provider registered in the application. Broader source coverage requires additional provider adapters. Deep research is thorough within configured public sources, not a claim of crawling the entire internet.
 
 ## current implementation boundary
 
