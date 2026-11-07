@@ -27,7 +27,9 @@ public sealed class InvestigationResearchService
     {
         ArgumentNullException.ThrowIfNull(investigation);
         var providers = _registry.Providers.ToArray();
-        var savedQueue = investigation.PendingResearchQueries.Count > 0
+        var isResuming = investigation.PendingResearchQueries.Count > 0;
+        if (!isResuming) investigation.CompletedResearchQueries = [];
+        var savedQueue = isResuming
             ? investigation.PendingResearchQueries.Select(x =>
                 new DeepResearchPlanner.ResearchQuery(x.Text, x.Depth, x.Reason))
             : DeepResearchPlanner.CreateSeedQueries(investigation);
