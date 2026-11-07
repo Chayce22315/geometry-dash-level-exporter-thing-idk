@@ -11,10 +11,10 @@ namespace LevelVault.Services;
 /// </summary>
 public sealed class EvidenceAnalysisService
 {
-    private static readonly Regex LevelIdPattern = new(@"\\blevel\\s*(?:id)?\\s*[:#=]\\s*(\\d{4,12})\\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex SongIdPattern = new(@"\\b(?:song(?:\\s*id)?|custom\\s*song)\\s*[:#=]\\s*(\\d{1,10})\\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex CreatorPattern = new(@"\\b(?:creator|created\\s*by|author|username)\\s*[:=@]\\s*([A-Za-z0-9_-]{2,32})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex UrlPattern = new(@"https?://[^\\s<>""']+", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex LevelIdPattern = new(@"\blevel\s*(?:id)?\s*[:#=]\s*(\d{4,12})\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex SongIdPattern = new(@"\b(?:song(?:\s*id)?|custom\s*song)\s*[:#=]\s*(\d{1,10})\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex CreatorPattern = new(@"\b(?:creator|created\s*by|author|username)\s*[:=@]\s*([A-Za-z0-9_-]{2,32})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex UrlPattern = new(@"https?://[^\s<>""']+", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     public EvidenceAnalysisSummary Analyze(Investigation investigation)
     {
@@ -98,15 +98,13 @@ public sealed class EvidenceAnalysisService
                     "archive reference and level id occur together; archive contents have not been validated.", "unverified");
         }
 
-        // A numeric investigation query is an explicit level-id clue, unlike arbitrary numbers in prose.
-        if (Regex.IsMatch(investigation.Query.Trim(), @"^\\d{4,12}$"))
+        if (Regex.IsMatch(investigation.Query.Trim(), @"^\d{4,12}$"))
         {
             var level = AddNode(nodes, "level-id", investigation.Query.Trim(), "level id");
             AddEdge(investigation, target.Id, level.Id, "targets-level",
                 "the investigation query is a numeric level id.", "unverified");
         }
 
-        // Mark repeated entities as corroborated only when distinct source hosts support them.
         var corroborated = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var group in mentions.GroupBy(x => x.EntityKey, StringComparer.OrdinalIgnoreCase))
         {
@@ -116,15 +114,16 @@ public sealed class EvidenceAnalysisService
             corroborated.Add(group.Key);
             var node = nodes.Values.FirstOrDefault(x => NodeKey(x.Type, x.Label).Equals(group.Key, StringComparison.OrdinalIgnoreCase));
             if (node is not null)
-                node.Notes = $"corroborated by {domains.Length} distinct source domains: {string.Join(", ", domains)}. this confirms repeated references, not the underlying claim.";
-            foreach (var edge in investigation.EvidenceEdges.Where(x => x.ToNodeId == node?.Id && x.Relationship == "mentions"))
             {
-                edge.Confidence = "corroborated";
-                edge.Rationale = $"the same {node!.Type} appears in clues from {domains.Length} distinct source domains.";
+                node.Notes = $"corroborated by {domains.Length} distinct source domains: {string.Join(", ", domains)}. this confirms repeated references, not the underlying claim.";
+                foreach (var edge in investigation.EvidenceEdges.Where(x => x.ToNodeId == node.Id && x.Relationship == "mentions"))
+                {
+                    edge.Confidence = "corroborated";
+                    edge.Rationale = $"the same {node.Type} appears in clues from {domains.Length} distinct source domains.";
+                }
             }
         }
 
-        // Exact canonical source URLs are strong duplicate indicators, but clues are never deleted.
         var duplicateGroups = clueNodes.Where(x => !string.IsNullOrWhiteSpace(x.CanonicalSource))
             .GroupBy(x => x.CanonicalSource, StringComparer.OrdinalIgnoreCase)
             .Where(x => x.Count() > 1);
@@ -142,12 +141,11 @@ public sealed class EvidenceAnalysisService
         }
 
         foreach (var node in nodes.Values) investigation.EvidenceNodes.Add(node);
-        var independentEntities = corroborated.Count;
         return new EvidenceAnalysisSummary(
             investigation.EvidenceNodes.Count,
             investigation.EvidenceEdges.Count,
             mentions.Count,
-            independentEntities,
+            corroborated.Count,
             duplicatePairs,
             "confidence describes source agreement, not proof that a level was recovered.");
     }
@@ -198,7 +196,8 @@ public sealed class EvidenceAnalysisService
         var host = uri.Host.ToLowerInvariant();
         if (host is "youtube.com" or "www.youtube.com" or "youtu.be" or "m.youtube.com" || host.EndsWith(".youtube.com"))
             return "video";
-        if (host is "archive.org" or "www.archive.org" && uri.AbsolutePath.StartsWith("/details/", StringComparison.OrdinalIgnoreCase))
+        if ((host is "archive.org" or "www.archive.org") &&
+            uri.AbsolutePath.StartsWith("/details/", StringComparison.OrdinalIgnoreCase))
             return "archive-record";
         if (host is "github.com" or "www.github.com" || host.EndsWith(".github.com")) return "repository";
         return "web-reference";
@@ -215,7 +214,7 @@ public sealed class EvidenceAnalysisService
     }
 
     private static string Normalize(string value) =>
-        Regex.Replace(value.Trim(), @"\\s+", " ").ToLowerInvariant();
+        Regex.Replace(value.Trim(), @"\s+", " ").ToLowerInvariant();
 
     private static string NodeKey(string type, string value) => type + ":" + Normalize(value);
 
