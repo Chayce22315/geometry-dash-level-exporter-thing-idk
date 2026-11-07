@@ -24,7 +24,7 @@ public sealed class EvidenceAnalysisService
 
         var nodes = new Dictionary<string, EvidenceNode>(StringComparer.OrdinalIgnoreCase);
         var mentions = new List<(Guid ClueId, string EntityKey, string Domain, string ClueText)>();
-        var target = AddNode(nodes, "target", investigation.Query, "investigation query", investigation.Id.ToString("N"));
+        var target = AddNode(nodes, "target", investigation.Query, "investigation query");
         var clueNodes = new List<(Clue Clue, EvidenceNode Node, string CanonicalSource)>();
 
         foreach (var clue in investigation.Clues)
@@ -209,7 +209,16 @@ public sealed class EvidenceAnalysisService
     private static string CanonicalizeUrl(string? value)
     {
         if (!Uri.TryCreate(value, UriKind.Absolute, out var uri)) return "";
-        var builder = new UriBuilder(uri) { Fragment = "", Query = "" };
+        var builder = new UriBuilder(uri) { Fragment = "" };
+        var queryParts = builder.Query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries);
+        var retained = queryParts.Where(part =>
+        {
+            var key = part.Split('=', 2)[0];
+            return !key.StartsWith("utm_", StringComparison.OrdinalIgnoreCase) &&
+                   !key.Equals("fbclid", StringComparison.OrdinalIgnoreCase) &&
+                   !key.Equals("gclid", StringComparison.OrdinalIgnoreCase);
+        });
+        builder.Query = string.Join("&", retained);
         return builder.Uri.AbsoluteUri.TrimEnd('/');
     }
 
