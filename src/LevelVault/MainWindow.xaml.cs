@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     private readonly EvidenceAnalysisService _analysis = new();
     private readonly ObservableCollection<Investigation> _investigations = [];
     private Investigation? _active;
+    private CancellationTokenSource? _researchCancellation;
 
     public MainWindow()
     {
@@ -44,27 +45,59 @@ public partial class MainWindow : Window
     private async void ResearchArchives_Click(object sender, RoutedEventArgs e)
     {
         if (_active is null) { StatusText.Text = "create or select an investigation first."; return; }
+        if (_researchCancellation is not null) return;
         if (string.IsNullOrWhiteSpace(_active.Query)) { StatusText.Text = "add a search clue first."; return; }
 
-        StatusText.Text = "searching configured public archives... this may take a moment.";
+        var investigation = _active;
+        _researchCancellation = new CancellationTokenSource();
+        var token = _researchCancellation.Token;
+        DeepResearchButton.IsEnabled = false;
+        CancelResearchButton.IsEnabled = true;
+        StatusText.Text = "starting deep research...";
+
+        var progress = new Progress<ResearchProgress>(update =>
+        {
+            StatusText.Text = $"deep research · query {update.QueriesCompleted + 1}/{update.QueryLimit} · depth {update.Depth + 1}/{DeepResearchPlanner.MaxDepth + 1}\n" +
+                $"{update.CurrentQuery}\n{update.Detail} · {update.CluesAdded} new clue(s)";
+        });
+
         try
         {
             var service = new InvestigationResearchService(_providers, _cache);
-            var summary = await service.ResearchAsync(_active);
-            var graph = _analysis.Analyze(_active);
-            await _store.SaveAsync(_active);
+            var summary = await service.ResearchAsync(
+                investigation,
+                progress,
+                checkpoint: ct => _store.SaveAsync(investigation, ct),
+                cancellationToken: token);
+
+            var graph = _analysis.Analyze(investigation);
+            await _store.SaveAsync(investigation);
             RefreshActive();
-            StatusText.Text = $"research complete: {summary.CluesAdded} new clue(s), {summary.ProvidersSucceeded}/{summary.ProvidersChecked} provider(s) responded. " +
-                $"graph: {graph.NodeCount} nodes, {graph.RelationshipCount} relationships. " + string.Join(" ", summary.Messages);
+            StatusText.Text = $"deep research complete: {summary.QueriesExecuted} queries across {summary.ProvidersChecked} provider checks, {summary.CluesAdded} new clue(s), depth {summary.MaxDepthReached + 1}. " +
+                $"{summary.FollowUpsRemaining} follow-up(s) remain. graph: {graph.NodeCount} nodes, {graph.RelationshipCount} relationships.";
         }
         catch (OperationCanceledException)
         {
-            StatusText.Text = "archive research cancelled.";
+            if (investigation == _active) RefreshActive();
+            StatusText.Text = "deep research paused. collected clues and pending searches were saved. run deep research again to resume.";
         }
         catch (Exception ex)
         {
-            StatusText.Text = "archive research failed: " + ex.Message;
+            StatusText.Text = "deep research paused after an error: " + ex.Message;
         }
+        finally
+        {
+            _researchCancellation?.Dispose();
+            _researchCancellation = null;
+            DeepResearchButton.IsEnabled = true;
+            CancelResearchButton.IsEnabled = false;
+        }
+    }
+
+    private void CancelResearch_Click(object sender, RoutedEventArgs e)
+    {
+        _researchCancellation?.Cancel();
+        StatusText.Text = "cancelling after the current safe checkpoint...";
     }
 
     private void OpenSearchSet_Click(object sender, RoutedEventArgs e)
