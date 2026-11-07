@@ -32,7 +32,7 @@ public sealed class GmdPayloadInspectorTests
         await using var compressed = new MemoryStream();
         await using (var gzip = new GZipStream(compressed, CompressionLevel.Optimal, true))
             await gzip.WriteAsync(payload);
-        var path = await WritePlistAsync(Convert.ToBase64String(compressed.ToArray()));
+        var path = await WritePlistWithEncodedPayloadAsync(Convert.ToBase64String(compressed.ToArray()));
         try
         {
             var result = await GmdPayloadInspector.InspectFileAsync(path);
@@ -46,7 +46,7 @@ public sealed class GmdPayloadInspectorTests
     [Fact]
     public async Task InvalidBase64IsNotAcceptedAsRecoveredData()
     {
-        var path = await WritePlistAsync("not base64!");
+        var path = await WritePlistWithEncodedPayloadAsync("not base64!");
         try
         {
             var result = await GmdPayloadInspector.InspectFileAsync(path);
@@ -88,7 +88,7 @@ public sealed class GmdPayloadInspectorTests
     public async Task CorruptGzipPayloadIsNotValidated()
     {
         var corruptGzip = Convert.ToBase64String(new byte[] { 0x1f, 0x8b, 0x08, 0x00, 0x01, 0x02, 0x03 });
-        var path = await WritePlistAsync(corruptGzip);
+        var path = await WritePlistWithEncodedPayloadAsync(corruptGzip);
         try
         {
             var result = await GmdPayloadInspector.InspectFileAsync(path);
@@ -155,11 +155,13 @@ public sealed class GmdPayloadInspectorTests
         finally { File.Delete(source); }
     }
 
-    private static async Task<string> WritePlistAsync(string payload)
+    private static Task<string> WritePlistAsync(string payload) =>
+        WritePlistWithEncodedPayloadAsync(Convert.ToBase64String(Encoding.UTF8.GetBytes(payload)));
+
+    private static async Task<string> WritePlistWithEncodedPayloadAsync(string encodedPayload)
     {
         var path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".plist");
-        var encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(payload));
-        var plist = $"<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>k1</key><integer>12345</integer><key>k2</key><string>demo level</string><key>k4</key><string>{encoded}</string></dict></plist>";
+        var plist = $"<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>k1</key><integer>12345</integer><key>k2</key><string>demo level</string><key>k4</key><string>{encodedPayload}</string></dict></plist>";
         await File.WriteAllTextAsync(path, plist);
         return path;
     }
