@@ -37,8 +37,18 @@ public sealed class InternetArchiveProvider : IArchiveProvider
         if (terms.Length == 0)
             return new(Id, false, [], "enter at least one search clue.");
 
-        var expression = string.Join(" AND ", terms.Select(term =>
-            $"(title:\"{EscapeTerm(term)}\" OR description:\"{EscapeTerm(term)}\" OR identifier:\"{EscapeTerm(term)}\" OR creator:\"{EscapeTerm(term)}\")"));
+        // Search terms as alternatives instead of requiring every word to appear in one
+        // metadata field. Numeric level ids also get an exact identifier/title match.
+        var expression = string.Join(" OR ", terms.SelectMany(term =>
+        {
+            var escaped = EscapeTerm(term);
+            if (Regex.IsMatch(escaped, @"^\\d{4,12}$"))
+                return new[] { $"identifier:{escaped}", $"title:\"{escaped}\"", $"description:\"{escaped}\"" };
+            var words = escaped.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Where(word => word.Length > 1).Take(8).ToArray();
+            return new[] { $"title:\"{escaped}\"", $"description:\"{escaped}\"", $"identifier:\"{escaped}\"" }
+                .Concat(words.Select(word => $"title:{word} OR description:{word}"));
+        }));
         var results = new List<ProviderSearchResult>();
         var identifiers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var pagesRead = 0;
