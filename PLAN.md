@@ -54,7 +54,7 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 
 ## milestones
 
-### m1: foundation (current)
+### m1: foundation
 - native desktop shell
 - local investigation persistence
 - generic search launch set
@@ -67,13 +67,16 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 - health/status reporting
 - caching and rate-limit policy
 - integration tests with saved fixtures
+- initial live internet archive metadata provider
 
-### m3: clue intelligence
-- entity normalization
-- relationship extraction
-- duplicate detection
-- confidence explanations
-- evidence graph
+### m3: clue intelligence (implemented, build verification pending)
+- conservative entity extraction for level ids, song ids, creator labels, videos, archive records, repositories, and web references
+- normalized graph entities and deterministic graph identifiers
+- relationship extraction with human-readable rationale
+- cross-domain corroboration without treating repeated metadata as recovered level data
+- duplicate-source detection that preserves every original clue
+- native wpf evidence graph viewer with source/rationale tooltips
+- automatic graph refresh after research, manual clue capture, and file inspection
 
 ### m4: autonomous investigations
 - query expansion
@@ -106,8 +109,8 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 confidence must be explainable and must not imply more than the evidence supports.
 
 - **unverified:** user-entered or uncorroborated clue
-- **corroborated:** supported by independent references
-- **strong match:** multiple distinctive fields agree
+- **corroborated:** the same extracted reference appears on at least two distinct source domains; this confirms repetition, not truth
+- **strong match:** reserved for exact canonical duplicate source references in this phase
 - **data recovered:** original level payload located
 - **validated:** payload passes applicable format and integrity checks
 
@@ -115,4 +118,4 @@ metadata confidence and level-data validation are separate dimensions.
 
 ## current implementation boundary
 
-the first commit is a usable investigation notebook and search launcher, not a crawler. automatic providers, graph visualization, response decompression, and gmd writing are future milestones and must be implemented against verified format documentation and test fixtures.
+phase 3 extracts only clearly labeled identifiers and references from clue text. it does not infer creator identity from arbitrary names, inspect video contents, claim archive metadata is a level payload, or fabricate missing data. provider research remains limited to documented or authorized access.
