@@ -4,15 +4,21 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LevelVault", "src\LevelVault\LevelVault.csproj", "{A14B6B1A-5C8B-4E3D-9B13-7B2D2F7D0A11}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LevelVault.Tests", "tests\LevelVault.Tests\LevelVault.Tests.csproj", "{D3A7A6F4-5C61-4D44-91D4-9D5C4D1A5B72}"
+EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A14B6B1A-5C8B-4E3D-9B13-7B2D2F7D0A11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A14B6B1A-5C8B-4E3D-9B13-7B2D2F7D0A11}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A14B6B1A-5C8B-4E3D-9B13-7B2D2F7D0A11}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A14B6B1A-5C8B-4E3D-9B13-7B2D2F7D0A11}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Release|Any CPU = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {A14B6B1A-5C8B-4E3D-9B13-7B2D2F7D0A11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {A14B6B1A-5C8B-4E3D-9B13-7B2D2F7D0A11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {A14B6B1A-5C8B-4E3D-9B13-7B2D2F7D0A11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {A14B6B1A-5C8B-4E3D-9B13-7B2D2F7D0A11}.Release|Any CPU.Build.0 = Release|Any CPU
+        {D3A7A6F4-5C61-4D44-91D4-9D5C4D1A5B72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {D3A7A6F4-5C61-4D44-91D4-9D5C4D1A5B72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {D3A7A6F4-5C61-4D44-91D4-9D5C4D1A5B72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {D3A7A6F4-5C61-4D44-91D4-9D5C4D1A5B72}.Release|Any CPU.Build.0 = Release|Any CPU
+    EndGlobalSection
 EndGlobal
