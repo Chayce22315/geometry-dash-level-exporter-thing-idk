@@ -75,14 +75,33 @@ public sealed class InvestigationResearchService
                     cancellationToken.ThrowIfCancellationRequested();
                     providersChecked++;
                     var cacheKey = provider.Id + "|deep-v2|" + item.Text.Trim().ToLowerInvariant();
-                    ProviderSearchResponse? response = await _cache.GetAsync<ProviderSearchResponse>(
-                        cacheKey, TimeSpan.FromHours(12), cancellationToken);
-                    if (response is null)
+                    ProviderSearchResponse response;
+                    try
                     {
-                        response = await provider.SearchAsync(
-                            new ProviderSearchQuery(FreeText: item.Text), cancellationToken);
-                        if (response.Succeeded)
-                            await _cache.SetAsync(cacheKey, response, cancellationToken);
+                        var cached = await _cache.GetAsync<ProviderSearchResponse>(
+                            cacheKey, TimeSpan.FromHours(12), cancellationToken);
+                        if (cached is not null)
+                        {
+                            response = cached;
+                        }
+                        else
+                        {
+                            response = await provider.SearchAsync(
+                                new ProviderSearchQuery(FreeText: item.Text), cancellationToken);
+                            if (response.Succeeded)
+                                await _cache.SetAsync(cacheKey, response, cancellationToken);
+                        }
+                    }
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        // A single unavailable provider must not abort the entire investigation.
+                        response = new ProviderSearchResponse(
+                            provider.Id, false, Array.Empty<ProviderSearchResult>(),
+                            $"provider failed: {ex.GetType().Name}: {ex.Message}");
                     }
 
                     messages.Add($"{provider.DisplayName}: {response.Message}");
