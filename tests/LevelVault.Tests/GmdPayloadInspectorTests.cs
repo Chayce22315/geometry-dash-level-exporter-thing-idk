@@ -70,6 +70,34 @@ public sealed class GmdPayloadInspectorTests
     }
 
     [Fact]
+    public async Task OversizedInputIsRejectedBeforeParsing()
+    {
+        var path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".plist");
+        await using (var file = new FileStream(path, FileMode.CreateNew, FileAccess.Write))
+            file.SetLength(GmdPayloadInspector.MaxInputBytes + 1);
+        try
+        {
+            var result = await GmdPayloadInspector.InspectFileAsync(path);
+            Assert.False(result.IsRecognized);
+            Assert.Contains("25 MiB", result.Summary);
+        }
+        finally { File.Delete(path); }
+    }
+
+    [Fact]
+    public async Task CorruptGzipPayloadIsNotValidated()
+    {
+        var corruptGzip = Convert.ToBase64String(new byte[] { 0x1f, 0x8b, 0x08, 0x00, 0x01, 0x02, 0x03 });
+        var path = await WritePlistAsync(corruptGzip);
+        try
+        {
+            var result = await GmdPayloadInspector.InspectFileAsync(path);
+            Assert.False(result.PayloadValidated);
+        }
+        finally { File.Delete(path); }
+    }
+
+    [Fact]
     public async Task NonPlistInputIsRejected()
     {
         var path = Path.GetTempFileName();
