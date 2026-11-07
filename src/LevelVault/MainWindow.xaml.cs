@@ -4,18 +4,22 @@ using System.Windows.Controls;
 using Microsoft.Win32;
 using LevelVault.Models;
 using LevelVault.Services;
+using LevelVault.Providers;
 
 namespace LevelVault;
 
 public partial class MainWindow : Window
 {
     private readonly InvestigationStore _store = new();
+    private readonly ProviderRegistry _providers = new();
+    private readonly JsonResponseCache _cache = new();
     private readonly ObservableCollection<Investigation> _investigations = [];
     private Investigation? _active;
 
     public MainWindow()
     {
         InitializeComponent();
+        _providers.Register(new InternetArchiveProvider());
         InvestigationList.ItemsSource = _investigations;
         Loaded += async (_, _) =>
         {
@@ -33,6 +37,32 @@ public partial class MainWindow : Window
         InvestigationList.SelectedItem = item;
         await _store.SaveAsync(item);
         StatusText.Text = "investigation created and saved locally.";
+    }
+
+    private async void ResearchArchives_Click(object sender, RoutedEventArgs e)
+    {
+        if (_active is null) { StatusText.Text = "create or select an investigation first."; return; }
+        if (string.IsNullOrWhiteSpace(_active.Query)) { StatusText.Text = "add a search clue first."; return; }
+
+        StatusText.Text = "searching configured public archives... this may take a moment.";
+        try
+        {
+            var service = new InvestigationResearchService(_providers, _cache);
+            var summary = await service.ResearchAsync(_active);
+            await _store.SaveAsync(_active);
+            RefreshActive();
+            StatusText.Text = $"research complete: {summary.CluesAdded} new clue(s), " +
+                $"{summary.ProvidersSucceeded}/{summary.ProvidersChecked} provider(s) responded. " +
+                string.Join(" ", summary.Messages);
+        }
+        catch (OperationCanceledException)
+        {
+            StatusText.Text = "archive research cancelled.";
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = "archive research failed: " + ex.Message;
+        }
     }
 
     private void OpenSearchSet_Click(object sender, RoutedEventArgs e)
