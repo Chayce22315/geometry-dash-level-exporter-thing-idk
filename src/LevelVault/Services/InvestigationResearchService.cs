@@ -101,7 +101,7 @@ public sealed class InvestigationResearchService
                             Title = result.Title,
                             Detail = $"discovered by deep research query: {item.Text}. " +
                                      (result.LevelId is null ? "" : "level id: " + result.LevelId + ". ") +
-                                     (result.Creator is null ? "" : "creator: " + result.Creator + ". ") +
+                                     (result.Creator is null ? "" : "source account/channel (unverified): " + result.Creator + ". ") +
                                      (result.SongId is null ? "" : "song id: " + result.SongId + ". ") +
                                      (result.RawDataReference is null ? "" : "archive identifier: " + result.RawDataReference + ". "),
                             SourceUrl = result.SourceUrl,
