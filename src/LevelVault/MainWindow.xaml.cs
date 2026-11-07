@@ -24,6 +24,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         _providers.Register(new InternetArchiveProvider());
         _providers.Register(new GitHubRepositoryProvider());
+        _providers.Register(new DuckDuckGoSearchProvider());
         InvestigationList.ItemsSource = _investigations;
         Loaded += async (_, _) =>
         {
@@ -74,8 +75,18 @@ public partial class MainWindow : Window
             var graph = _analysis.Analyze(investigation);
             await _store.SaveAsync(investigation);
             RefreshActive();
-            StatusText.Text = $"deep research complete: {summary.QueriesExecuted} queries across {summary.ProvidersChecked} provider checks, {summary.CluesAdded} new clue(s), depth {summary.MaxDepthReached + 1}. " +
+            StatusText.Text = $"deep research complete: {summary.QueriesExecuted} queries, {summary.ProvidersChecked} provider checks ({summary.ProvidersSucceeded} succeeded, {summary.ProvidersFailed} failed), {summary.CluesAdded} new clue(s). " +
                 $"{summary.FollowUpsRemaining} follow-up(s) remain. graph: {graph.NodeCount} nodes, {graph.RelationshipCount} relationships.";
+            var providerReport = summary.Messages
+                .GroupBy(message => message.Split(':', 2)[0], StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.Key + Environment.NewLine + string.Join(Environment.NewLine,
+                    group.Select(message => message.Contains(':') ? message[(message.IndexOf(':') + 1)..].Trim() : message)
+                        .Distinct(StringComparer.OrdinalIgnoreCase).Select(message => "  • " + message)));
+            MessageBox.Show(
+                $"queries executed: {summary.QueriesExecuted}\nprovider checks: {summary.ProvidersChecked}\nsucceeded: {summary.ProvidersSucceeded}\nfailed: {summary.ProvidersFailed}\nnew clues: {summary.CluesAdded}\n\n" +
+                string.Join("\n\n", providerReport) +
+                (summary.CluesAdded == 0 ? "\n\nno clues were found. try a shorter name, creator username, song id, or another known clue. a successful empty search is not proof that a level never existed." : ""),
+                "levelvault research report", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (OperationCanceledException)
         {
@@ -204,6 +215,7 @@ public partial class MainWindow : Window
         ActiveSubtitle.Text = _active is null ? "create an investigation to begin collecting evidence."
             : $"{_active.Clues.Count} clue(s) · {_active.EvidenceNodes.Count} graph nodes · {_active.EvidenceEdges.Count} relationships · research: {_active.ResearchStatus} · created {_active.CreatedUtc.ToLocalTime():g}";
         ClueGrid.ItemsSource = _active?.Clues;
+        EmptyCluesText.Visibility = _active is null || _active.Clues.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private static string Prompt(string message, string title)
