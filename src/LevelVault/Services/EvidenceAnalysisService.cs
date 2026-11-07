@@ -63,6 +63,7 @@ public sealed class EvidenceAnalysisService
                 var label = kind switch
                 {
                     "video" => "video reference",
+                    "discussion" => "discussion reference",
                     "archive-record" => "archive record",
                     "repository" => "code repository",
                     _ => uri.Host
@@ -194,8 +195,14 @@ public sealed class EvidenceAnalysisService
     private static string ClassifyUrl(Uri uri)
     {
         var host = uri.Host.ToLowerInvariant();
-        if (host is "youtube.com" or "www.youtube.com" or "youtu.be" or "m.youtube.com" || host.EndsWith(".youtube.com"))
+        if (host is "youtube.com" or "www.youtube.com" or "youtu.be" or "m.youtube.com" || host.EndsWith(".youtube.com") ||
+            host is "tiktok.com" or "www.tiktok.com" or "vm.tiktok.com" or "vt.tiktok.com" || host.EndsWith(".tiktok.com"))
             return "video";
+        if (host is "discord.com" or "www.discord.com" or "discordapp.com" or "www.discordapp.com" or "discord.gg" ||
+            host.EndsWith(".discord.com") || host.EndsWith(".discordapp.com"))
+            return "discussion";
+        if (host is "reddit.com" or "www.reddit.com" or "redd.it" || host.EndsWith(".reddit.com"))
+            return "discussion";
         if ((host is "archive.org" or "www.archive.org") &&
             uri.AbsolutePath.StartsWith("/details/", StringComparison.OrdinalIgnoreCase))
             return "archive-record";
