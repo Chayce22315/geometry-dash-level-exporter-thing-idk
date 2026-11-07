@@ -9,6 +9,8 @@ public sealed class Investigation
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedUtc { get; set; } = DateTime.UtcNow;
     public ObservableCollection<Clue> Clues { get; set; } = [];
+    public ObservableCollection<EvidenceNode> EvidenceNodes { get; set; } = [];
+    public ObservableCollection<EvidenceEdge> EvidenceEdges { get; set; } = [];
 }
 
 public sealed class Clue
