@@ -91,12 +91,17 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 - saved research status and history counters
 - automatic evidence graph refresh after a completed run
 
-### m5: recovery
-- response parsers
-- compression/decompression fixtures
-- integrity validation
-- historical version comparison
-- partial-data diagnostics
+### m5: recovery (initial implementation)
+- inspect original .gmd/plist/xml files and decode the k4 payload
+- detect gzip by magic bytes and safely decompress with a 64 MiB expanded-size limit
+- validate the comma-separated object key/value structure without rewriting source bytes
+- scan local clue file paths and public Internet Archive item metadata for .gmd/.plist/.xml candidates
+- download only supported candidate file types from archive.org, with a 25 MiB cap
+- preserve source URL, retrieval time, raw SHA-256, payload SHA-256, level name/id, and validation status
+- deduplicate identical source files by SHA-256
+- distinguish validated payloads from partial/unvalidated candidates
+- never treat metadata, screenshots, videos, or arbitrary pages as recovered level data
+- remaining: historical version comparison, broader authorized source adapters, fixtures and automated recovery tests
 
 ### m6: export studio
 - gmd writer for verified formats
