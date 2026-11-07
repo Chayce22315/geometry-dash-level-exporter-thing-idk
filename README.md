@@ -11,7 +11,7 @@ current status: native windows desktop app. phases 1–6 have been build-confirm
 - native windows desktop shell built with wpf / .net 8
 - create and persist multiple investigations locally
 - universal clue input: level id, title, creator, song id, date, or mixed clues
-- curated search launch set for bing, duckduckgo, youtube, github, reddit, and community references
+- curated search launch set for bing, duckduckgo, youtube, tiktok, github, reddit, indexed public discord links, and community references
 - manually capture clue title, source url, and notes
 - import and structurally inspect `.gmd` / plist files
 - keep evidence and investigation history in local app data
