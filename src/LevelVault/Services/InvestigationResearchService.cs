@@ -74,7 +74,7 @@ public sealed class InvestigationResearchService
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     providersChecked++;
-                    var cacheKey = provider.Id + "|deep|" + item.Text.Trim().ToLowerInvariant();
+                    var cacheKey = provider.Id + "|deep-v2|" + item.Text.Trim().ToLowerInvariant();
                     ProviderSearchResponse? response = await _cache.GetAsync<ProviderSearchResponse>(
                         cacheKey, TimeSpan.FromHours(12), cancellationToken);
                     if (response is null)
