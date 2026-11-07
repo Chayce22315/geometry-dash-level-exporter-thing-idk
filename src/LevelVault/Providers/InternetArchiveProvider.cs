@@ -13,6 +13,8 @@ public sealed class InternetArchiveProvider : IArchiveProvider
     private static readonly HttpClient Client = CreateClient();
     private static readonly SemaphoreSlim RateGate = new(1, 1);
     private static DateTime _lastRequestUtc = DateTime.MinValue;
+    private const int RowsPerPage = 50;
+    private const int MaxPagesPerQuery = 3;
 
     public string Id => "internet-archive";
     public string DisplayName => "internet archive";
@@ -34,49 +36,65 @@ public sealed class InternetArchiveProvider : IArchiveProvider
 
         var expression = string.Join(" AND ", terms.Select(term =>
             $"(title:\"{EscapeTerm(term)}\" OR description:\"{EscapeTerm(term)}\" OR identifier:\"{EscapeTerm(term)}\" OR creator:\"{EscapeTerm(term)}\")"));
-        var url = "https://archive.org/advancedsearch.php?q=" + Uri.EscapeDataString(expression) +
-                  "&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=date&fl[]=description&rows=50&page=1&output=json";
+        var results = new List<ProviderSearchResult>();
+        var identifiers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var pagesRead = 0;
 
         try
         {
-            await RateGate.WaitAsync(cancellationToken);
-            try
+            for (var page = 1; page <= MaxPagesPerQuery; page++)
             {
-                var wait = TimeSpan.FromSeconds(3) - (DateTime.UtcNow - _lastRequestUtc);
-                if (wait > TimeSpan.Zero) await Task.Delay(wait, cancellationToken);
-                using var response = await Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-                _lastRequestUtc = DateTime.UtcNow;
-                if (response.StatusCode == HttpStatusCode.TooManyRequests)
-                    return new(Id, false, [], "internet archive rate limited the request. wait before retrying.");
-                response.EnsureSuccessStatusCode();
-                await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-                using var json = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
-                var docs = json.RootElement.GetProperty("response").GetProperty("docs");
-                var results = new List<ProviderSearchResult>();
-                foreach (var doc in docs.EnumerateArray())
+                cancellationToken.ThrowIfCancellationRequested();
+                var url = "https://archive.org/advancedsearch.php?q=" + Uri.EscapeDataString(expression) +
+                          "&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=date&fl[]=description" +
+                          $"&rows={RowsPerPage}&page={page}&output=json";
+
+                await RateGate.WaitAsync(cancellationToken);
+                try
                 {
-                    var identifier = ReadString(doc, "identifier");
-                    if (string.IsNullOrWhiteSpace(identifier)) continue;
-                    var title = ReadString(doc, "title") ?? identifier;
-                    var creator = ReadString(doc, "creator");
-                    var date = ReadString(doc, "date");
-                    var description = ReadString(doc, "description");
-                    var notes = string.Join(" · ", new[] { creator, date, description }.Where(x => !string.IsNullOrWhiteSpace(x)));
-                    results.Add(new ProviderSearchResult(
-                        title + (string.IsNullOrWhiteSpace(notes) ? "" : " · " + notes),
-                        "https://archive.org/details/" + Uri.EscapeDataString(identifier),
-                        "archive metadata",
-                        Creator: creator,
-                        RawDataReference: identifier));
+                    var wait = TimeSpan.FromSeconds(3) - (DateTime.UtcNow - _lastRequestUtc);
+                    if (wait > TimeSpan.Zero) await Task.Delay(wait, cancellationToken);
+                    using var response = await Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                    _lastRequestUtc = DateTime.UtcNow;
+                    if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                        return new(Id, false, results, "internet archive rate limited the request. wait before retrying.");
+                    response.EnsureSuccessStatusCode();
+
+                    await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                    using var json = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+                    var docs = json.RootElement.GetProperty("response").GetProperty("docs");
+                    pagesRead++;
+                    var pageCount = docs.GetArrayLength();
+
+                    foreach (var doc in docs.EnumerateArray())
+                    {
+                        var identifier = ReadString(doc, "identifier");
+                        if (string.IsNullOrWhiteSpace(identifier) || !identifiers.Add(identifier)) continue;
+                        var title = ReadString(doc, "title") ?? identifier;
+                        var creator = ReadString(doc, "creator");
+                        var date = ReadString(doc, "date");
+                        var description = ReadString(doc, "description");
+                        var notes = string.Join(" · ", new[] { creator, date, description }.Where(x => !string.IsNullOrWhiteSpace(x)));
+                        results.Add(new ProviderSearchResult(
+                            title + (string.IsNullOrWhiteSpace(notes) ? "" : " · " + notes),
+                            "https://archive.org/details/" + Uri.EscapeDataString(identifier),
+                            "archive metadata",
+                            Creator: creator,
+                            RawDataReference: identifier));
+                    }
+
+                    if (pageCount < RowsPerPage) break;
                 }
-                return new(Id, true, results, $"internet archive returned {results.Count} metadata record(s). records are leads, not recovered level data.");
+                finally { RateGate.Release(); }
             }
-            finally { RateGate.Release(); }
+
+            return new(Id, true, results,
+                $"internet archive returned {results.Count} unique metadata record(s) across {pagesRead} page(s). records are leads, not recovered level data.");
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or KeyNotFoundException)
         {
-            return new(Id, false, [], "internet archive search failed: " + ex.Message);
+            return new(Id, false, results, "internet archive search failed: " + ex.Message);
         }
     }
 
