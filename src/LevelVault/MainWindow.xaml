@@ -16,7 +16,7 @@
                 <TextBlock Text="geometry dash clue finder &amp; recovery workspace" Foreground="{StaticResource MutedBrush}" Margin="0,4,0,0"/>
             </StackPanel>
             <Border DockPanel.Dock="Right" Background="#282344" CornerRadius="12" Padding="12,7" VerticalAlignment="Center">
-                <TextBlock Text="phase 6 · export studio" Foreground="#C8C0FF" FontSize="11" FontWeight="SemiBold"/>
+                <TextBlock Text="phase 7 · hardening & release" Foreground="#C8C0FF" FontSize="11" FontWeight="SemiBold"/>
             </Border>
         </DockPanel>
 
