@@ -11,6 +11,7 @@ public sealed class Investigation
     public ObservableCollection<Clue> Clues { get; set; } = [];
     public ObservableCollection<EvidenceNode> EvidenceNodes { get; set; } = [];
     public ObservableCollection<EvidenceEdge> EvidenceEdges { get; set; } = [];
+    public List<RecoveryCandidate> RecoveryCandidates { get; set; } = [];
 
     // Deep-research state is persisted locally so a run can resume without repeating completed queries.
     public List<string> CompletedResearchQueries { get; set; } = [];
@@ -20,6 +21,24 @@ public sealed class Investigation
     public int ResearchCluesAdded { get; set; }
     public DateTime? LastResearchStartedUtc { get; set; }
     public DateTime? LastResearchCompletedUtc { get; set; }
+}
+
+public sealed class RecoveryCandidate
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Title { get; set; } = "";
+    public string SourceUrl { get; set; } = "";
+    public string LocalPath { get; set; } = "";
+    public string Format { get; set; } = "";
+    public string LevelName { get; set; } = "";
+    public string LevelId { get; set; } = "";
+    public string Status { get; set; } = "unverified";
+    public string ValidationSummary { get; set; } = "";
+    public string RawFileSha256 { get; set; } = "";
+    public string PayloadSha256 { get; set; } = "";
+    public long PayloadBytes { get; set; }
+    public DateTime DiscoveredUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? RetrievedUtc { get; set; }
 }
 
 public sealed class Clue
