@@ -177,7 +177,7 @@ public partial class MainWindow : Window
     {
         ActiveTitle.Text = _active?.Query ?? "no investigation selected";
         ActiveSubtitle.Text = _active is null ? "create an investigation to begin collecting evidence."
-            : $"{_active.Clues.Count} clue(s) · {_active.EvidenceNodes.Count} graph nodes · {_active.EvidenceEdges.Count} relationships · created {_active.CreatedUtc.ToLocalTime():g}";
+            : $"{_active.Clues.Count} clue(s) · {_active.EvidenceNodes.Count} graph nodes · {_active.EvidenceEdges.Count} relationships · research: {_active.ResearchStatus} · created {_active.CreatedUtc.ToLocalTime():g}";
         ClueGrid.ItemsSource = _active?.Clues;
     }
 
