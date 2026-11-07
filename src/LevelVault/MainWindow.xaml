@@ -16,7 +16,7 @@
                 <TextBlock Text="geometry dash clue finder &amp; recovery workspace" Foreground="{StaticResource MutedBrush}" Margin="0,4,0,0"/>
             </StackPanel>
             <Border DockPanel.Dock="Right" Background="#282344" CornerRadius="12" Padding="12,7" VerticalAlignment="Center">
-                <TextBlock Text="LOCAL-FIRST · EARLY BUILD" Foreground="#C8C0FF" FontSize="11" FontWeight="SemiBold"/>
+                <TextBlock Text="phase 3 · clue intelligence" Foreground="#C8C0FF" FontSize="11" FontWeight="SemiBold"/>
             </Border>
         </DockPanel>
 
@@ -65,8 +65,10 @@
                     </StackPanel>
                     <DockPanel Grid.Row="1" Margin="0,18,0,10">
                         <TextBlock Text="collected clues" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <Button DockPanel.Dock="Right" Content="import .gmd" Click="ImportGmd_Click"/>
-                        <Button DockPanel.Dock="Right" Content="open search set" Click="OpenSearchSet_Click"/>
+                        <Button DockPanel.Dock="Right" Content="view graph" Click="ViewGraph_Click" Margin="4,0,0,0"/>
+                        <Button DockPanel.Dock="Right" Content="analyze clues" Click="AnalyzeClues_Click" Margin="4,0,0,0"/>
+                        <Button DockPanel.Dock="Right" Content="import .gmd" Click="ImportGmd_Click" Margin="4,0,0,0"/>
+                        <Button DockPanel.Dock="Right" Content="open search set" Click="OpenSearchSet_Click" Margin="4,0,0,0"/>
                         <Button DockPanel.Dock="Right" Content="add clue" Click="AddClue_Click"/>
                     </DockPanel>
                     <DataGrid x:Name="ClueGrid" Grid.Row="2" AutoGenerateColumns="False" CanUserAddRows="False"
@@ -80,7 +82,7 @@
                             <DataGridTextColumn Header="confidence" Binding="{Binding Confidence}" Width="110"/>
                         </DataGrid.Columns>
                     </DataGrid>
-                    <TextBlock Grid.Row="3" x:Name="StatusText" Text="clues are stored locally. search links open in your browser; nothing is silently scraped." Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,12,0,0"/>
+                    <TextBlock Grid.Row="3" x:Name="StatusText" Text="clues are stored locally. analyze them to build an evidence graph." Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,12,0,0"/>
                 </Grid>
             </Border>
         </Grid>
