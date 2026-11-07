@@ -15,7 +15,7 @@ current status: native windows desktop app. phases 1–6 have been build-confirm
 - manually capture clue title, source url, and notes
 - import and structurally inspect `.gmd` / plist files
 - keep evidence and investigation history in local app data
-- provider-independent service boundaries with live internet archive metadata, github public repository search, and duckduckgo public web search adapters
+- provider-independent service boundaries with live internet archive metadata, github public repository search, duckduckgo web search, reddit discussion search, and youtube video search adapters
 - automatic source-linked clue collection, duplicate suppression, and a versioned 12-hour local response cache
 - conservative request spacing, cancellation support, and provider health checks
 - phase 3 entity extraction for explicitly labeled level ids, song ids, creators, and discovered urls
@@ -45,7 +45,7 @@ implemented; the user confirmed the windows build succeeded. graph entities are 
 
 ## phase 4 status
 
-implemented; the user confirmed the windows build succeeded. every research run uses the deep-research pipeline. it expands the original query, follows newly discovered clues, checks every registered provider, reports progress, and saves a resumable queue after each completed query. the current run limits are 24 queries and four follow-up levels. internet archive searches paginate up to three pages of 50 records each. internet archive metadata, github public repository search, duckduckgo public web search, reddit public discussion search, and youtube public video search are currently registered. duckduckgo's public html results are an external interface that may change or temporarily limit requests. broader coverage still requires additional documented or authorized source adapters.
+implemented; the user confirmed the windows build succeeded. every research run uses the deep-research pipeline. it expands the original query, follows newly discovered clues, checks every registered provider, reports progress, and saves a resumable queue after each completed query. the current run limits are 24 queries and four follow-up levels. internet archive searches paginate up to three pages of 50 records each. internet archive metadata, github public repository search, duckduckgo public web search, reddit public discussion search, and youtube public video search are currently registered. duckduckgo and youtube public html results are external interfaces that may change or rate-limit requests. reddit may deny or rate-limit unauthenticated public search. broader coverage still requires additional documented or authorized source adapters.
 
 ## remaining improvements
 
