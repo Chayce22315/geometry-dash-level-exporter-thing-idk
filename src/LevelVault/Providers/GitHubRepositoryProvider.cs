@@ -30,7 +30,9 @@ public sealed class GitHubRepositoryProvider : IArchiveProvider
         if (string.IsNullOrWhiteSpace(term))
             return new(Id, false, [], "enter a search clue.");
 
-        var search = $"{term.Trim()} geometry dash in:readme";
+        // Repository search indexes names, descriptions, and README text. Avoid
+        // forcing README-only matches, which excluded useful repository metadata.
+        var search = $"{term.Trim()} geometry dash";
         var url = "https://api.github.com/search/repositories?q=" +
                   Uri.EscapeDataString(search) + "&sort=updated&order=desc&per_page=30";
 
