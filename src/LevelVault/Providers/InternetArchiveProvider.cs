@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace LevelVault.Providers;
 
@@ -15,6 +16,8 @@ public sealed class InternetArchiveProvider : IArchiveProvider
     private static DateTime _lastRequestUtc = DateTime.MinValue;
     private const int RowsPerPage = 50;
     private const int MaxPagesPerQuery = 3;
+    private static readonly Regex LevelIdPattern = new(@"\\blevel\\s*(?:id)?\\s*[:#=]\\s*(\\d{4,12})\\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex SongIdPattern = new(@"\\b(?:song(?:\\s*id)?|custom\\s*song)\\s*[:#=]\\s*(\\d{1,10})\\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     public string Id => "internet-archive";
     public string DisplayName => "internet archive";
@@ -75,11 +78,16 @@ public sealed class InternetArchiveProvider : IArchiveProvider
                         var date = ReadString(doc, "date");
                         var description = ReadString(doc, "description");
                         var notes = string.Join(" · ", new[] { creator, date, description }.Where(x => !string.IsNullOrWhiteSpace(x)));
+                        var searchableText = string.Join(" ", title, identifier, description);
+                        var levelId = LevelIdPattern.Match(searchableText);
+                        var songId = SongIdPattern.Match(searchableText);
                         results.Add(new ProviderSearchResult(
                             title + (string.IsNullOrWhiteSpace(notes) ? "" : " · " + notes),
                             "https://archive.org/details/" + Uri.EscapeDataString(identifier),
                             "archive metadata",
+                            LevelId: levelId.Success ? levelId.Groups[1].Value : null,
                             Creator: creator,
+                            SongId: songId.Success ? songId.Groups[1].Value : null,
                             RawDataReference: identifier));
                     }
 
