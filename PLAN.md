@@ -111,12 +111,13 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 - re-inspect exported file and compare raw SHA-256; remove a failed output
 - remaining: automated round-trip tests, raw-response export, investigation-report export, batch export, and broader format fixtures
 
-### m7: hardening and release
-- automated test suite
-- provider failure simulations
-- malformed input tests
-- accessibility and performance
-- signed/reproducible release packaging
+### m7: hardening and release (implementation in progress)
+- add a dedicated automated test project to the solution
+- cover valid plist payloads, gzip decompression, malformed base64, malformed object pairs, and non-plist inputs
+- verify export refuses partial candidates and preserves original bytes with a provenance manifest
+- run restore, build, and tests in windows github actions
+- publish a self-contained single-file win-x64 app artifact for main-branch pushes
+- remaining: provider failure simulations, recovery network edge cases, accessibility/performance review, clean-machine artifact verification, versioned release notes, and signed/reproducible release packaging
 
 ## evidence confidence
 
@@ -134,6 +135,6 @@ metadata confidence and level-data validation are separate dimensions.
 
 Every run uses the deep-research pipeline. It starts from the original query, expands into game-context and explicitly identified entity searches, then creates follow-up queries from newly discovered source records. The current safety bounds are 24 queries per run, depth 4, and up to 3 pages of 50 metadata records per Internet Archive query. A later run resumes saved pending queries rather than silently restarting completed work. The current live providers are Internet Archive metadata search and GitHub public repository search; the engine fans out to every provider registered in the application. Broader source coverage requires additional provider adapters. Deep research is thorough within configured public sources, not a claim of crawling the entire internet.
 
-## current implementation boundary
+## phase 7 verification boundary\n\nA passing compile is not the same as a passing test suite or a verified release. Phase 7 is complete only after the Windows CI workflow passes its automated tests and successfully publishes an artifact that has been checked on a clean Windows environment. The current test fixtures verify format behavior; they do not prove that a recovered file is authored by a claimed creator or that every possible Geometry Dash payload variant is supported.\n\n## current implementation boundary
 
 phase 3 extracts only clearly labeled identifiers and references from clue text. it does not infer creator identity from arbitrary names, inspect video contents, claim archive metadata is a level payload, or fabricate missing data. provider research remains limited to documented or authorized access.
