@@ -27,8 +27,11 @@ public sealed class InvestigationResearchService
     {
         ArgumentNullException.ThrowIfNull(investigation);
         var providers = _registry.Providers.ToArray();
-        var queue = new Queue<DeepResearchPlanner.ResearchQuery>(
-            DeepResearchPlanner.CreateSeedQueries(investigation));
+        var savedQueue = investigation.PendingResearchQueries.Count > 0
+            ? investigation.PendingResearchQueries.Select(x =>
+                new DeepResearchPlanner.ResearchQuery(x.Text, x.Depth, x.Reason))
+            : DeepResearchPlanner.CreateSeedQueries(investigation);
+        var queue = new Queue<DeepResearchPlanner.ResearchQuery>(savedQueue);
         var queued = new HashSet<string>(queue.Select(x => x.Text), StringComparer.OrdinalIgnoreCase);
         var completed = new HashSet<string>(investigation.CompletedResearchQueries, StringComparer.OrdinalIgnoreCase);
         var knownSources = new HashSet<string>(
@@ -45,7 +48,7 @@ public sealed class InvestigationResearchService
 
         investigation.ResearchStatus = "running";
         investigation.LastResearchStartedUtc = DateTime.UtcNow;
-        await checkpoint?.Invoke(cancellationToken)!;
+        if (checkpoint is not null) await checkpoint(cancellationToken);
 
         try
         {
@@ -124,27 +127,39 @@ public sealed class InvestigationResearchService
 
                 investigation.ResearchQueriesExecuted = queriesExecuted;
                 investigation.ResearchCluesAdded += newlyDiscovered.Count;
-                await checkpoint?.Invoke(cancellationToken)!;
+                investigation.PendingResearchQueries = queue
+                    .Select(x => new ResearchQueryState { Text = x.Text, Depth = x.Depth, Reason = x.Reason })
+                    .ToList();
+                if (checkpoint is not null) await checkpoint(cancellationToken);
                 progress?.Report(new ResearchProgress(
                     "query complete", item.Text, item.Depth, queriesExecuted,
                     DeepResearchPlanner.MaxQueriesPerRun, cluesAdded,
                     $"{newlyDiscovered.Count} new source(s) · {queue.Count} follow-up search(es) queued"));
             }
 
+            investigation.PendingResearchQueries = queue
+                .Select(x => new ResearchQueryState { Text = x.Text, Depth = x.Depth, Reason = x.Reason })
+                .ToList();
             investigation.ResearchStatus = queue.Count == 0 ? "completed" : "completed · query limit reached";
             investigation.LastResearchCompletedUtc = DateTime.UtcNow;
-            await checkpoint?.Invoke(cancellationToken)!;
+            if (checkpoint is not null) await checkpoint(cancellationToken);
         }
         catch (OperationCanceledException)
         {
+            investigation.PendingResearchQueries = queue
+                .Select(x => new ResearchQueryState { Text = x.Text, Depth = x.Depth, Reason = x.Reason })
+                .ToList();
             investigation.ResearchStatus = "paused · cancelled";
-            await checkpoint?.Invoke(CancellationToken.None)!;
+            if (checkpoint is not null) await checkpoint(CancellationToken.None);
             throw;
         }
         catch
         {
+            investigation.PendingResearchQueries = queue
+                .Select(x => new ResearchQueryState { Text = x.Text, Depth = x.Depth, Reason = x.Reason })
+                .ToList();
             investigation.ResearchStatus = "paused · error";
-            await checkpoint?.Invoke(CancellationToken.None)!;
+            if (checkpoint is not null) await checkpoint(CancellationToken.None);
             throw;
         }
 
