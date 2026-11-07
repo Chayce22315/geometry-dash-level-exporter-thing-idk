@@ -12,7 +12,7 @@ public static class DeepResearchPlanner
     public const int MaxQueriesPerRun = 24;
     public const int MaxDepth = 4;
 
-    private static readonly Regex LevelId = new(@"\b(?:level\s*(?:id)?\s*[:#=]?\s*)(\d{4,12})\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex LevelId = new(@"\b(?:level\s*(?:id)?\s*[:#=]?\s*)?(\d{4,12})\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex SongId = new(@"\b(?:song(?:\s*id)?|custom\s*song)\s*[:#=]\s*(\d{1,10})\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex Creator = new(@"\b(?:creator|created\s*by|author|username)\s*[:=@]\s*([A-Za-z0-9_-]{2,32})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
