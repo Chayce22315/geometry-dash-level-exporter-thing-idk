@@ -103,11 +103,13 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 - never treat metadata, screenshots, videos, or arbitrary pages as recovered level data
 - remaining: historical version comparison, broader authorized source adapters, fixtures and automated recovery tests
 
-### m6: export studio
-- gmd writer for verified formats
-- raw response export
-- metadata and provenance manifest
-- round-trip tests
+### m6: export studio (initial implementation)
+- native WPF export studio lists recovery candidates and permits selection
+- export only candidates already marked validated; re-inspect the source before writing
+- preserve original candidate bytes unchanged rather than reconstructing or fabricating level data
+- write an adjacent JSON provenance manifest with source URL, original format, level metadata, hashes, and validation disclaimer
+- re-inspect exported file and compare raw SHA-256; remove a failed output
+- remaining: automated round-trip tests, raw-response export, investigation-report export, batch export, and broader format fixtures
 
 ### m7: hardening and release
 - automated test suite
