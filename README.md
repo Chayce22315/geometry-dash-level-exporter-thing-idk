@@ -4,7 +4,7 @@
 
 levelvault investigates public references to geometry dash levels, organizes evidence, and helps locate surviving original level data. its long-term goal is to validate and export authentic `.gmd` files.
 
- > current status: early windows desktop build. phase 3 clue intelligence is implemented and the user-confirmed build succeeded. phase 4 adds always-on deep research orchestration. the current live sources are internet archive metadata and github public repository search; this is not an internet-wide crawler or a level downloader.
+> current status: early windows desktop build. phase 3 clue intelligence is implemented and the user-confirmed build succeeded. phase 4 adds always-on deep research orchestration. the current live sources are internet archive metadata and github public repository search; this is not an internet-wide crawler or a level downloader.
 
 ## what exists now
 
@@ -35,7 +35,7 @@ implemented; the user confirmed the windows build succeeded. graph entities are 
 
 ## phase 4 status
 
-implemented in source; awaiting a fresh windows build. every research run uses the deep-research pipeline. it expands the original query, follows newly discovered clues, checks every registered provider, reports progress, and saves a resumable queue after each completed query. the current run limits are 24 queries and four follow-up levels. internet archive searches paginate up to three pages of 50 records each. only internet archive is currently registered as a live provider, so broader coverage arrives as additional documented public-source adapters are added.
+implemented in source; awaiting a fresh windows build. every research run uses the deep-research pipeline. it expands the original query, follows newly discovered clues, checks every registered provider, reports progress, and saves a resumable queue after each completed query. the current run limits are 24 queries and four follow-up levels. internet archive searches paginate up to three pages of 50 records each. internet archive and github public repository search are currently registered; broader coverage arrives as additional documented public-source adapters are added.
 
 ## planned capabilities
 
@@ -94,7 +94,7 @@ src/LevelVault/
 
 1. foundation and local investigation workspace
 2. provider framework and initial public archive integration
-3. clue extraction, correlation, and graph (implemented, build verification pending)
+3. clue extraction, correlation, and graph (implemented; build confirmed by user)
 4. autonomous, resumable deep investigations (implemented, build pending)
 5. level-string parsing, decompression, and validation
 6. provenance-aware .gmd export
