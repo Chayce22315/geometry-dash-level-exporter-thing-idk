@@ -17,8 +17,31 @@ public static class GmdPayloadInspector
     {
         var info = new FileInfo(path);
         if (!info.Exists) return Fail("file does not exist.");
-        if (info.Length > MaxInputBytes) return Fail("file exceeds the 25 MiB inspection limit.");
-        var bytes = await File.ReadAllBytesAsync(path, ct);
+
+        byte[] bytes;
+        try
+        {
+            await using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
+                81920, FileOptions.Asynchronous | FileOptions.SequentialScan);
+            if (input.Length > MaxInputBytes) return Fail("file exceeds the 25 MiB inspection limit.");
+            await using var bufferStream = new MemoryStream((int)input.Length);
+            var buffer = new byte[81920];
+            while (true)
+            {
+                var count = await input.ReadAsync(buffer, ct);
+                if (count == 0) break;
+                if (bufferStream.Length + count > MaxInputBytes)
+                    return Fail("file grew beyond the 25 MiB inspection limit while being read.");
+                await bufferStream.WriteAsync(buffer.AsMemory(0, count), ct);
+            }
+            bytes = bufferStream.ToArray();
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return Fail("could not read input file: " + ex.Message);
+        }
+
         var rawHash = Convert.ToHexString(SHA256.HashData(bytes));
         try
         {
