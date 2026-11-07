@@ -4,7 +4,7 @@
 
 levelvault investigates public references to geometry dash levels, organizes evidence, and helps locate surviving original level data. its long-term goal is to validate and export authentic `.gmd` files.
 
-current status: native windows desktop app. phases 1–6 have been build-confirmed by the user. phase 7 adds automated validation tests and a self-contained windows release artifact through github actions. current live research sources are internet archive metadata, github public repository search, duckduckgo public web search, reddit public discussion search, and youtube public video search. these adapters broaden discovery but do not crawl the entire internet.
+current status: native windows desktop app. phases 1–6 have been build-confirmed by the user. phase 7 adds automated validation tests and a self-contained windows release artifact through github actions. current live research sources include an exact-id Boomlings server lookup, internet archive metadata, github public repository search, duckduckgo public web search, reddit public discussion search, and youtube public video search. these adapters broaden discovery but do not crawl the entire internet.
 
 ## what exists now
 
@@ -15,7 +15,7 @@ current status: native windows desktop app. phases 1–6 have been build-confirm
 - manually capture clue title, source url, and notes
 - import and structurally inspect `.gmd` / plist files
 - keep evidence and investigation history in local app data
-- provider-independent service boundaries with live internet archive metadata, github public repository search, duckduckgo web search, reddit discussion search, and youtube video search adapters
+- provider-independent service boundaries with a dedicated Boomlings exact-id metadata adapter plus internet archive metadata, github public repository search, duckduckgo web search, reddit discussion search, and youtube video search adapters
 - automatic source-linked clue collection, duplicate suppression, and a versioned 12-hour local response cache
 - conservative request spacing, cancellation support, and provider health checks
 - phase 3 entity extraction for explicitly labeled level ids, song ids, creators, and discovered urls
@@ -81,7 +81,7 @@ investigations are stored under:
 %LOCALAPPDATA%\\LevelVault\\investigations
 ```
 
-each investigation is a readable json file. investigations and cache files remain local. when archive research is started, search clues are sent to the registered public providers (internet archive, github, duckduckgo, reddit, and youtube). successful responses are cached locally for 12 hours.
+each investigation is a readable json file. investigations and cache files remain local. when archive research is started, search clues are sent to registered providers. the Boomlings adapter only sends an exact numeric level id to the public type-10 level lookup; other generic searches are skipped by that adapter. other providers search their respective public sources. successful responses are cached locally for 12 hours.
 
 ## important recovery rules
 
@@ -89,6 +89,7 @@ each investigation is a readable json file. investigations and cache files remai
 - a valid plist container is not proof that a file is complete or authentic.
 - only recovered original level data may be exported as an authentic level.
 - missing objects must never be invented to make an export appear complete.
+- the Boomlings adapter uses the documented `getGJLevels21.php` type-10 exact-id lookup and conservative request spacing. it records current metadata only; it does not treat an empty or `-1` response as proof that a level never existed.
 - providers must use documented or authorized access methods and respect rate limits.
 - levelvault does not bypass cloudflare, authentication, or other access controls.
 
