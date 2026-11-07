@@ -48,11 +48,11 @@ public sealed class InvestigationResearchService
 
         investigation.ResearchStatus = "running";
         investigation.LastResearchStartedUtc = DateTime.UtcNow;
-        if (checkpoint is not null) await checkpoint(cancellationToken);
 
         DeepResearchPlanner.ResearchQuery? activeQuery = null;
         try
         {
+            if (checkpoint is not null) await checkpoint(cancellationToken);
             while (queue.Count > 0 && queriesExecuted < DeepResearchPlanner.MaxQueriesPerRun)
             {
                 cancellationToken.ThrowIfCancellationRequested();
