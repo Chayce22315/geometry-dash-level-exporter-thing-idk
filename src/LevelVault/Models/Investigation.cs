@@ -14,6 +14,7 @@ public sealed class Investigation
 
     // Deep-research state is persisted locally so a run can resume without repeating completed queries.
     public List<string> CompletedResearchQueries { get; set; } = [];
+    public List<ResearchQueryState> PendingResearchQueries { get; set; } = [];
     public string ResearchStatus { get; set; } = "not started";
     public int ResearchQueriesExecuted { get; set; }
     public int ResearchCluesAdded { get; set; }
@@ -30,4 +31,11 @@ public sealed class Clue
     public string SourceUrl { get; set; } = "";
     public string Confidence { get; set; } = "unverified";
     public DateTime AddedUtc { get; set; } = DateTime.UtcNow;
+}
+
+public sealed class ResearchQueryState
+{
+    public string Text { get; set; } = "";
+    public int Depth { get; set; }
+    public string Reason { get; set; } = "";
 }
