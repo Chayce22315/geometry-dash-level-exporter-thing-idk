@@ -33,7 +33,13 @@ current status: native windows desktop app. phases 1–6 have been build-confirm
 - automatic adjacent JSON provenance manifest containing source, hashes, level metadata, and validation notes
 - re-inspection before export and round-trip verification of the exported copy; failed copies are removed
 - phase 7 automated tests for valid plist payloads, gzip payloads, malformed base64, malformed object pairs, non-plist input, and safe export behavior
-- provider diagnostics report per-source success, failure, and empty-result messages after each research run\n- explicit empty-state guidance replaces the blank clue-table appearance\n- reddit public search collects public discussion links and metadata without assuming post authors created the level\n- youtube public search collects public video links, titles, and channel names as leads\n- internet archive query expansion supports broader word matching and exact numeric-id searches\n- github repository searches are no longer restricted to readme-only matches\n- github actions runs the test suite and publishes a self-contained win-x64 app artifact on pushes to main
+- provider diagnostics report per-source success, failure, and empty-result messages after each research run
+- explicit empty-state guidance replaces the blank clue-table appearance
+- reddit public search collects public discussion links and metadata without assuming post authors created the level
+- youtube public search collects public video links, titles, and channel names as leads
+- internet archive query expansion supports broader word matching and exact numeric-id searches
+- github repository searches are no longer restricted to readme-only matches
+- github actions runs the test suite and publishes a self-contained win-x64 app artifact on pushes to main
 
 ## phase 7 status
 
