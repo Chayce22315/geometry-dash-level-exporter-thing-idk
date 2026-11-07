@@ -69,73 +69,20 @@ public sealed class InvestigationResearchService
                     DeepResearchPlanner.MaxQueriesPerRun, cluesAdded,
                     $"deep research · round {item.Depth + 1} · {item.Reason}"));
 
+                providersChecked += providers.Length;
+                var providerResponses = await Task.WhenAll(providers.Select(provider =>
+                    SearchProviderSafelyAsync(provider, item.Text, cancellationToken)));
+
                 var newlyDiscovered = new List<Clue>();
-                foreach (var provider in providers)
+                foreach (var outcome in providerResponses)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    providersChecked++;
-                    var cacheKey = provider.Id + "|deep-v2|" + item.Text.Trim().ToLowerInvariant();
-                    ProviderSearchResponse response;
-                    ProviderSearchResponse? cached = null;
-                    try
-                    {
-                        cached = await _cache.GetAsync<ProviderSearchResponse>(
-                            cacheKey, TimeSpan.FromHours(12), cancellationToken);
-                    }
-                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-                    {
-                        throw;
-                    }
-                    catch
-                    {
-                        // A damaged or inaccessible cache entry should trigger a fresh provider request.
-                    }
-
-                    if (cached is not null)
-                    {
-                        response = cached;
-                    }
-                    else
-                    {
-                        try
-                        {
-                            response = await provider.SearchAsync(
-                                new ProviderSearchQuery(FreeText: item.Text), cancellationToken);
-                        }
-                        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-                        {
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            // A single unavailable provider must not abort the entire investigation.
-                            response = new ProviderSearchResponse(
-                                provider.Id, false, Array.Empty<ProviderSearchResult>(),
-                                $"provider failed: {ex.GetType().Name}: {ex.Message}");
-                        }
-
-                        if (response.Succeeded)
-                        {
-                            try
-                            {
-                                await _cache.SetAsync(cacheKey, response, cancellationToken);
-                            }
-                            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-                            {
-                                throw;
-                            }
-                            catch (Exception ex)
-                            {
-                                messages.Add($"{provider.DisplayName}: response could not be cached ({ex.GetType().Name}).");
-                            }
-                        }
-                    }
-
+                    var provider = outcome.Provider;
+                    var response = outcome.Response;
                     messages.Add($"{provider.DisplayName}: {response.Message}");
                     if (response.Succeeded) providersSucceeded++;
                     else providersFailed++;
 
-                    // Some providers can return useful partial results before a rate limit or transient failure.
+                    // Keep useful partial results even when a provider reports a failure.
                     foreach (var result in response.Results)
                     {
                         var sourceKey = NormalizeSource(result.SourceUrl);
@@ -214,6 +161,63 @@ public sealed class InvestigationResearchService
         return new ResearchRunSummary(
             queriesExecuted, providersChecked, providersSucceeded, providersFailed,
             cluesAdded, maxDepthReached, queue.Count, messages);
+    }
+
+    private async Task<(IArchiveProvider Provider, ProviderSearchResponse Response)> SearchProviderSafelyAsync(
+        IArchiveProvider provider, string query, CancellationToken cancellationToken)
+    {
+        var cacheKey = provider.Id + "|deep-v3|" + query.Trim().ToLowerInvariant();
+        ProviderSearchResponse? cached = null;
+        try
+        {
+            cached = await _cache.GetAsync<ProviderSearchResponse>(
+                cacheKey, TimeSpan.FromHours(12), cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch
+        {
+            // A damaged or inaccessible cache entry should trigger a fresh provider request.
+        }
+
+        if (cached is not null) return (provider, cached);
+
+        ProviderSearchResponse response;
+        try
+        {
+            response = await provider.SearchAsync(
+                new ProviderSearchQuery(FreeText: query), cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            response = new ProviderSearchResponse(
+                provider.Id, false, Array.Empty<ProviderSearchResult>(),
+                $"provider failed: {ex.GetType().Name}: {ex.Message}");
+        }
+
+        if (response.Succeeded)
+        {
+            try
+            {
+                await _cache.SetAsync(cacheKey, response, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch
+            {
+                // Cache persistence is optional; a successful live result remains useful.
+            }
+        }
+
+        return (provider, response);
     }
 
     private static string NormalizeSource(string? source)
