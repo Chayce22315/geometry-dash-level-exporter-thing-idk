@@ -114,7 +114,7 @@ public sealed class YouTubeSearchProvider : IArchiveProvider
 
     private static string? ReadRuns(JsonElement element, string name)
     {
-        if (!element.TryGetProperty(name, out var value)) return null;
+        if (!element.TryGetProperty(name, out var value) || value.ValueKind != JsonValueKind.Object) return null;
         if (value.TryGetProperty("simpleText", out var simple) && simple.ValueKind == JsonValueKind.String)
             return simple.GetString();
         if (!value.TryGetProperty("runs", out var runs) || runs.ValueKind != JsonValueKind.Array)
