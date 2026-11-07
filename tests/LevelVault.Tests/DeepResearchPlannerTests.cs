@@ -29,6 +29,35 @@ public sealed class DeepResearchPlannerTests
     }
 
     [Fact]
+    public void NumericIdAddsExactAndFileSearchVariants()
+    {
+        var queries = DeepResearchPlanner.CreateSeedQueries(new Investigation { Query = "133678584" });
+
+        Assert.Contains(queries, query => query.Text == "geometry dash level 133678584");
+        Assert.Contains(queries, query => query.Text == "\"133678584\" geometry dash");
+        Assert.Contains(queries, query => query.Text == "133678584 gmd");
+    }
+
+    [Fact]
+    public void ResearchHasExpandedButBoundedDepthAndQueryBudget()
+    {
+        Assert.Equal(36, DeepResearchPlanner.MaxQueriesPerRun);
+        Assert.Equal(5, DeepResearchPlanner.MaxDepth);
+    }
+
+    [Fact]
+    public void FollowUpAddsExactTitleAndFileArchiveSearches()
+    {
+        var clue = new Clue { Title = "old mines" };
+
+        var queries = DeepResearchPlanner.CreateFollowUpQueries(clue, 2);
+
+        Assert.Contains(queries, query => query.Text == "old mines geometry dash");
+        Assert.Contains(queries, query => query.Text == "\"old mines\" geometry dash");
+        Assert.Contains(queries, query => query.Text == "old mines deleted level gmd");
+    }
+
+    [Fact]
     public void FollowUpUsesDiscoveredTitleWithoutInventingIdentifiers()
     {
         var clue = new Clue { Title = "a vanished geometry dash level" };
