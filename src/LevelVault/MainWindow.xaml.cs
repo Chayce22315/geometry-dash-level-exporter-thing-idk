@@ -113,6 +113,12 @@ public partial class MainWindow : Window
         catch (Exception ex) { StatusText.Text = "recovery scan stopped: " + ex.Message; }
     }
 
+    private void ExportStudio_Click(object sender, RoutedEventArgs e)
+    {
+        if (_active is null) { StatusText.Text = "select an investigation first."; return; }
+        new ExportStudioWindow(_active.RecoveryCandidates) { Owner = this }.ShowDialog();
+    }
+
     private void CancelResearch_Click(object sender, RoutedEventArgs e)
     {
         _researchCancellation?.Cancel();
