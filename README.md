@@ -4,7 +4,7 @@
 
 levelvault investigates public references to geometry dash levels, organizes evidence, and helps locate surviving original level data. its long-term goal is to validate and export authentic `.gmd` files.
 
-> current status: early windows desktop foundation. this is not yet an automated internet-wide crawler or a level downloader.
+ > current status: early windows desktop build. phase 2 includes one live public archive adapter. this is not yet an internet-wide crawler or a level downloader.
 
 ## what exists now
 
@@ -15,7 +15,15 @@ levelvault investigates public references to geometry dash levels, organizes evi
 - manually capture clue title, source url, and notes
 - import and structurally inspect `.gmd` / plist files
 - keep evidence and investigation history in local app data
-- provider-independent service boundaries to expand into automated adapters
+- provider-independent service boundaries and a live internet archive metadata search adapter
+- automatic source-linked clue collection, duplicate suppression, and a 12-hour local response cache
+- conservative request spacing, cancellation support, and provider health checks
+
+## phase 2 status
+
+implemented: provider contract and registry, internet archive public metadata search, normalized source-linked clues, local caching, rate limiting, cancellation, and health checks.
+
+still planned: more archive adapters, multi-hop query expansion, evidence graph visualization, original level payload retrieval, decompression, and authentic `.gmd` export. internet archive records are metadata leads, not recovered level files.
 
 ## planned capabilities
 
@@ -48,7 +56,7 @@ investigations are stored under:
 %LOCALAPPDATA%\LevelVault\investigations
 ```
 
-each investigation is a readable json file. the app does not upload investigation data.
+each investigation is a readable json file. investigations and cache files remain local. when archive research is started, the search clue is sent to internet archive to perform the search. successful responses are cached for 12 hours.
 
 ## important recovery rules
 
@@ -72,7 +80,7 @@ src/LevelVault/
 ## roadmap
 
 1. foundation and local investigation workspace
-2. verified public-source provider adapters
+2. provider framework and initial public archive integration (in progress)
 3. clue extraction, correlation, and graph
 4. autonomous, resumable investigations
 5. level-string parsing, decompression, and validation
