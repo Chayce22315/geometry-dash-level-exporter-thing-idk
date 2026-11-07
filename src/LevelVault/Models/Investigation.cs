@@ -11,6 +11,14 @@ public sealed class Investigation
     public ObservableCollection<Clue> Clues { get; set; } = [];
     public ObservableCollection<EvidenceNode> EvidenceNodes { get; set; } = [];
     public ObservableCollection<EvidenceEdge> EvidenceEdges { get; set; } = [];
+
+    // Deep-research state is persisted locally so a run can resume without repeating completed queries.
+    public List<string> CompletedResearchQueries { get; set; } = [];
+    public string ResearchStatus { get; set; } = "not started";
+    public int ResearchQueriesExecuted { get; set; }
+    public int ResearchCluesAdded { get; set; }
+    public DateTime? LastResearchStartedUtc { get; set; }
+    public DateTime? LastResearchCompletedUtc { get; set; }
 }
 
 public sealed class Clue
