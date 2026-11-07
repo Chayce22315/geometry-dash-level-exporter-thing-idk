@@ -4,7 +4,7 @@
 
 levelvault investigates public references to geometry dash levels, organizes evidence, and helps locate surviving original level data. its long-term goal is to validate and export authentic `.gmd` files.
 
- > current status: early windows desktop build. phase 3 clue intelligence is implemented and the user-confirmed build succeeded. phase 4 adds always-on deep research orchestration. the current live source is internet archive; this is not an internet-wide crawler or a level downloader.
+ > current status: early windows desktop build. phase 3 clue intelligence is implemented and the user-confirmed build succeeded. phase 4 adds always-on deep research orchestration. the current live sources are internet archive metadata and github public repository search; this is not an internet-wide crawler or a level downloader.
 
 ## what exists now
 
@@ -15,7 +15,7 @@ levelvault investigates public references to geometry dash levels, organizes evi
 - manually capture clue title, source url, and notes
 - import and structurally inspect `.gmd` / plist files
 - keep evidence and investigation history in local app data
-- provider-independent service boundaries and a live internet archive metadata search adapter
+- provider-independent service boundaries with live internet archive metadata and github public repository search adapters
 - automatic source-linked clue collection, duplicate suppression, and a 12-hour local response cache
 - conservative request spacing, cancellation support, and provider health checks
 - phase 3 entity extraction for explicitly labeled level ids, song ids, creators, and discovered urls
@@ -23,7 +23,7 @@ levelvault investigates public references to geometry dash levels, organizes evi
 - exact-source duplicate detection that preserves all original clues
 - native wpf evidence graph viewer with hover details
 - phase 4 always-on deep research: multi-round query expansion from the target and newly discovered clues
-- every deep-research query is sent to every registered provider
+- every deep-research query is sent to every registered provider (currently internet archive and github repositories)
 - up to 24 queries per run, four follow-up levels, and up to 150 archive metadata results per query
 - live progress and cancellation controls
 - automatic checkpoints, saved pending-query queues, and resume after cancellation or interruption
