@@ -90,7 +90,7 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 - multi-round query expansion from the original target and newly discovered clues
 - every query is routed through every registered provider, reusing fresh cached responses when available
 - bounded investigation depth and query count to prevent runaway searches
-- provider pagination for up to 150 archive metadata records per query
+- provider pagination for up to 250 archive metadata records per query
 - 12-hour response caching and source-level deduplication
 - live progress reporting and cancellation
 - checkpoint after every completed query
@@ -118,14 +118,14 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 - re-inspect exported file and compare raw SHA-256; remove a failed output
 - remaining: automated round-trip tests, raw-response export, investigation-report export, batch export, and broader format fixtures
 
-### m7: hardening and release (implementation in progress)
+### m7: hardening and release (implementation in progress; windows CI verified)
 - add a dedicated automated test project to the solution
-- cover valid plist payloads, gzip decompression, malformed base64, malformed object pairs, non-plist inputs, and public provider input validation
+- cover valid plist payloads, gzip decompression, malformed base64, malformed object pairs, non-plist inputs, public provider input validation, and provider-failure isolation
 - verify export refuses partial candidates and preserves original bytes with a provenance manifest
 - run restore, build, and tests in windows github actions
 - publish a self-contained single-file win-x64 app artifact for main-branch pushes
 - latest verification: windows workflow #109 passed restore, build, automated tests, self-contained win-x64 publishing, and artifact upload
-- remaining: provider failure simulations, recovery network edge cases, accessibility/performance review, clean-machine artifact verification, versioned release notes, and signed/reproducible release packaging
+- remaining: additional recovery fixtures and network-edge-case tests, accessibility/performance review, clean-machine artifact verification, versioned release notes, and signed/reproducible release packaging
 
 ## evidence confidence
 
@@ -141,7 +141,7 @@ metadata confidence and level-data validation are separate dimensions.
 
 ## phase 4 research policy
 
-Every run uses the deep-research pipeline. It starts from the original query, expands into game-context and explicitly identified entity searches, then creates follow-up queries from newly discovered source records. The current safety bounds are 24 queries per run, depth 4, and up to 3 pages of 50 metadata records per Internet Archive query. A later run resumes saved pending queries rather than silently restarting completed work. The current live providers are Internet Archive metadata search, GitHub public repository search, DuckDuckGo public HTML web search, Reddit public discussion search, and YouTube public video search; the engine fans out to every provider registered in the application. The DuckDuckGo and YouTube HTML interfaces are not stable APIs and may change or rate-limit requests. Reddit may deny or rate-limit unauthenticated public search. These sources provide leads only, not recovered level data. Deep research is thorough within configured public sources, not a claim of crawling the entire internet.
+Every run uses the deep-research pipeline. It starts from the original query, expands into game-context and explicitly identified entity searches, then creates follow-up queries from newly discovered source records. The current safety bounds are 36 queries per run, depth 5, and up to 5 pages of 50 metadata records per Internet Archive query. A later run resumes saved pending queries rather than silently restarting completed work. The current live providers are Internet Archive metadata search, GitHub public repository search, DuckDuckGo public HTML web search, Reddit public discussion search, and YouTube public video search; the engine fans out to every provider registered in the application. The DuckDuckGo and YouTube HTML interfaces are not stable APIs and may change or rate-limit requests. Reddit may deny or rate-limit unauthenticated public search. These sources provide leads only, not recovered level data. Deep research is thorough within configured public sources, not a claim of crawling the entire internet.
 
 ## phase 7 verification boundary
 
