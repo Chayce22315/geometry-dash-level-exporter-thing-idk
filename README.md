@@ -24,7 +24,7 @@ current status: native windows desktop app. phases 1–6 have been build-confirm
 - native wpf evidence graph viewer with hover details
 - phase 4 always-on deep research: multi-round query expansion from the target and newly discovered clues
 - every deep-research query is routed through every registered provider, reusing fresh cached responses when available (internet archive, github repositories, duckduckgo web search, reddit, and youtube)
-- up to 24 queries per run, four follow-up levels, and up to 150 archive metadata results per query
+- up to 36 queries per run, five follow-up levels, and up to 250 archive metadata results per query
 - live progress and cancellation controls
 - automatic checkpoints, saved pending-query queues, and resume after cancellation or interruption
 - saved research status and query history
@@ -52,12 +52,12 @@ implemented; the user confirmed the windows build succeeded. graph entities are 
 
 ## phase 4 status
 
-implemented; the user confirmed the windows build succeeded. every research run uses the deep-research pipeline. it expands the original query, follows newly discovered clues, checks every registered provider, reports progress, and saves a resumable queue after each completed query. the current run limits are 24 queries and four follow-up levels. internet archive searches paginate up to three pages of 50 records each. internet archive metadata, github public repository search, duckduckgo public web search, reddit public discussion search, and youtube public video search are currently registered. duckduckgo and youtube public html results are external interfaces that may change or rate-limit requests. reddit may deny or rate-limit unauthenticated public search. broader coverage still requires additional documented or authorized source adapters.
+implemented; the user confirmed the windows build succeeded. every research run uses the deep-research pipeline. it expands the original query, follows newly discovered clues, checks every registered provider, reports progress, and saves a resumable queue after each completed query. the current run limits are 36 queries and five follow-up levels. internet archive searches paginate up to five pages of 50 records each. github repository search requests up to 50 results and reddit public search requests up to 50 results per query. providers are queried concurrently per research round while each provider retains its own request-spacing controls. internet archive metadata, github public repository search, duckduckgo public web search, reddit public discussion search, and youtube public video search are currently registered. duckduckgo and youtube public html results are external interfaces that may change or rate-limit requests. reddit may deny or rate-limit unauthenticated public search. broader coverage still requires additional documented or authorized source adapters.
 
 ## remaining improvements
 
 - add more documented public-source adapters and historical-version comparison
-- add provider failure simulations and more recovery fixtures
+- add additional recovery fixtures and network-edge-case tests
 - verify the release artifact on a clean windows machine and prepare versioned release notes
 
 ## requirements
