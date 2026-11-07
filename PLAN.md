@@ -69,7 +69,7 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 - integration tests with saved fixtures
 - initial live internet archive metadata provider
 
-### m3: clue intelligence (implemented, build verification pending)
+### m3: clue intelligence (implemented; build confirmed by user)
 - conservative entity extraction for level ids, song ids, creator labels, videos, archive records, repositories, and web references
 - normalized graph entities and deterministic graph identifiers
 - relationship extraction with human-readable rationale
@@ -78,11 +78,18 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 - native wpf evidence graph viewer with source/rationale tooltips
 - automatic graph refresh after research, manual clue capture, and file inspection
 
-### m4: autonomous investigations
-- query expansion
-- provider orchestration
-- progress, cancellation, resume
-- investigation report
+### m4: autonomous investigations (implemented, build verification pending)
+- deep research is the default behavior for every research run; no shallow mode
+- multi-round query expansion from the original target and newly discovered clues
+- every query is sent to every registered provider
+- bounded investigation depth and query count to prevent runaway searches
+- provider pagination for up to 150 archive metadata records per query
+- 12-hour response caching and source-level deduplication
+- live progress reporting and cancellation
+- checkpoint after every completed query
+- persisted pending-query queue, so cancelled or interrupted research can resume
+- saved research status and history counters
+- automatic evidence graph refresh after a completed run
 
 ### m5: recovery
 - response parsers
@@ -115,6 +122,10 @@ confidence must be explainable and must not imply more than the evidence support
 - **validated:** payload passes applicable format and integrity checks
 
 metadata confidence and level-data validation are separate dimensions.
+
+## phase 4 research policy
+
+Every run uses the deep-research pipeline. It starts from the original query, expands into game-context and explicitly identified entity searches, then creates follow-up queries from newly discovered source records. The current safety bounds are 24 queries per run, depth 4, and up to 3 pages of 50 metadata records per Internet Archive query. A later run resumes saved pending queries rather than silently restarting completed work. The current live provider is Internet Archive; the engine fans out to every provider registered in the application, and broader source coverage requires additional provider adapters. Deep research is thorough within configured public sources, not a claim of crawling the entire internet.
 
 ## current implementation boundary
 
