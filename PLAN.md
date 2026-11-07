@@ -75,6 +75,7 @@ the application must work for arbitrary targets. no level id, creator, song, or 
 - live duckduckgo public web-search adapter with conservative request spacing
 - live reddit public search adapter for public discussion leads
 - live youtube public search-page adapter for public video leads
+- exact-id Boomlings adapter using `getGJLevels21.php` with type `10`; it skips generic text queries, matches only the requested id, applies request spacing and short-lived in-memory caching, and records current metadata without claiming it recovered the level string
 
 ### m3: clue intelligence (implemented; build confirmed by user)
 - conservative entity extraction for level ids, song ids, creator labels, videos, archive records, repositories, and web references
@@ -141,7 +142,7 @@ metadata confidence and level-data validation are separate dimensions.
 
 ## phase 4 research policy
 
-Every run uses the deep-research pipeline. It starts from the original query, expands into game-context and explicitly identified entity searches, then creates follow-up queries from newly discovered source records. The current safety bounds are 36 queries per run, depth 5, and up to 5 pages of 50 metadata records per Internet Archive query. A later run resumes saved pending queries rather than silently restarting completed work. The current live providers are Internet Archive metadata search, GitHub public repository search, DuckDuckGo public HTML web search, Reddit public discussion search, and YouTube public video search; the engine fans out to every provider registered in the application. The DuckDuckGo and YouTube HTML interfaces are not stable APIs and may change or rate-limit requests. Reddit may deny or rate-limit unauthenticated public search. These sources provide leads only, not recovered level data. Deep research is thorough within configured public sources, not a claim of crawling the entire internet.
+Every run uses the deep-research pipeline. It starts from the original query, expands into game-context and explicitly identified entity searches, then creates follow-up queries from newly discovered source records. The current safety bounds are 36 queries per run, depth 5, and up to 5 pages of 50 metadata records per Internet Archive query. A later run resumes saved pending queries rather than silently restarting completed work. The current live providers are Internet Archive metadata search, GitHub public repository search, DuckDuckGo public HTML web search, Reddit public discussion search, and YouTube public video search; the engine fans out to every provider registered in the application. The DuckDuckGo and YouTube HTML interfaces are not stable APIs and may change or rate-limit requests. Reddit may deny or rate-limit unauthenticated public search. These sources provide leads only, not recovered level data. the Boomlings adapter uses the documented type-10 exact-id lookup and deliberately does not infer historical deletion from a missing result. `-1`, access denial, rate limiting, and a successful empty result are reported as distinct outcomes. Deep research is thorough within configured public sources, not a claim of crawling the entire internet.
 
 ## phase 7 verification boundary
 
