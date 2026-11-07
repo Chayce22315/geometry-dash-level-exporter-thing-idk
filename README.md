@@ -4,7 +4,7 @@
 
 levelvault investigates public references to geometry dash levels, organizes evidence, and helps locate surviving original level data. its long-term goal is to validate and export authentic `.gmd` files.
 
-> current status: early windows desktop build. phase 3 adds conservative clue intelligence and a native evidence graph. phase 2 includes one live public archive adapter. this is not an internet-wide crawler or a level downloader.
+ > current status: early windows desktop build. phase 3 clue intelligence is implemented and the user-confirmed build succeeded. phase 4 adds always-on deep research orchestration. the current live source is internet archive; this is not an internet-wide crawler or a level downloader.
 
 ## what exists now
 
@@ -22,10 +22,20 @@ levelvault investigates public references to geometry dash levels, organizes evi
 - relationship graph with source-linked rationale and conservative cross-domain corroboration
 - exact-source duplicate detection that preserves all original clues
 - native wpf evidence graph viewer with hover details
+- phase 4 always-on deep research: multi-round query expansion from the target and newly discovered clues
+- every deep-research query is sent to every registered provider
+- up to 24 queries per run, four follow-up levels, and up to 150 archive metadata results per query
+- live progress and cancellation controls
+- automatic checkpoints, saved pending-query queues, and resume after cancellation or interruption
+- saved research status and query history
 
 ## phase 3 status
 
-implemented in source; awaiting the automated windows build. graph entities are normalized, relationships carry confidence explanations, and repeated references are corroborated only when they appear across distinct source domains. exact duplicate source urls are linked but never deleted. a corroborated reference is not proof of authorship or recovered level data.
+implemented; the user confirmed the windows build succeeded. graph entities are normalized, relationships carry confidence explanations, and repeated references are corroborated only when they appear across distinct source domains. exact duplicate source urls are linked but never deleted. a corroborated reference is not proof of authorship or recovered level data.
+
+## phase 4 status
+
+implemented in source; awaiting a fresh windows build. every research run uses the deep-research pipeline. it expands the original query, follows newly discovered clues, checks every registered provider, reports progress, and saves a resumable queue after each completed query. the current run limits are 24 queries and four follow-up levels. internet archive searches paginate up to three pages of 50 records each. only internet archive is currently registered as a live provider, so broader coverage arrives as additional documented public-source adapters are added.
 
 ## planned capabilities
 
@@ -85,7 +95,7 @@ src/LevelVault/
 1. foundation and local investigation workspace
 2. provider framework and initial public archive integration
 3. clue extraction, correlation, and graph (implemented, build verification pending)
-4. autonomous, resumable investigations
+4. autonomous, resumable deep investigations (implemented, build pending)
 5. level-string parsing, decompression, and validation
 6. provenance-aware .gmd export
 7. expanded archives, testing, and release packaging
