@@ -16,8 +16,8 @@ public sealed class InternetArchiveProvider : IArchiveProvider
     private static DateTime _lastRequestUtc = DateTime.MinValue;
     private const int RowsPerPage = 50;
     private const int MaxPagesPerQuery = 3;
-    private static readonly Regex LevelIdPattern = new(@"\\blevel\\s*(?:id)?\\s*[:#=]\\s*(\\d{4,12})\\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex SongIdPattern = new(@"\\b(?:song(?:\\s*id)?|custom\\s*song)\\s*[:#=]\\s*(\\d{1,10})\\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex LevelIdPattern = new(@"\blevel\s*(?:id)?\s*[:#=]\s*(\d{4,12})\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex SongIdPattern = new(@"\b(?:song(?:\s*id)?|custom\s*song)\s*[:#=]\s*(\d{1,10})\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     public string Id => "internet-archive";
     public string DisplayName => "internet archive";
